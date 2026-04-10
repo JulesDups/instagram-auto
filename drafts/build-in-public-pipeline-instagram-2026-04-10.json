@@ -1,0 +1,52 @@
+{
+  "id": "build-in-public-pipeline-instagram-2026-04-10",
+  "createdAt": "2026-04-10T10:00:00.000Z",
+  "theme": "build-in-public",
+  "slides": [
+    {
+      "kind": "hook",
+      "title": "Ce post a été **codé** avant d'être écrit",
+      "body": "Le pipeline instagram-auto vient de le générer, valider et envoyer. Voici l'architecture en 5 slides."
+    },
+    {
+      "kind": "content",
+      "title": "Stack : **Next.js 16**, Vercel Blob, Graph API",
+      "body": "Claude.ai Scheduled Task génère le JSON. L'app Next valide, rend les slides via next/og, et publie sur Instagram. Pas de no-code, pas de Canva."
+    },
+    {
+      "kind": "content",
+      "title": "Un seul **garde-fou** humain : l'email",
+      "body": "Le draft déclenche un email avec preview des slides et deux liens HMAC signés : Publier ou Rejeter. Rien ne part sans ce clic."
+    },
+    {
+      "kind": "content",
+      "title": "Pourquoi **open source** ?",
+      "body": "Pas par altruisme. Pour documenter mes choix en temps réel, voir ce qui tient et apprendre des retours. Build in public comme contrainte de qualité, pas comme stratégie marketing."
+    },
+    {
+      "kind": "content",
+      "title": "Le piège que j'aurais aimé éviter : **proxy.ts**",
+      "body": "Next.js 16 renomme middleware.ts en proxy.ts. Un export nommé compile sans erreur — mais crashe silencieusement au runtime. 1h de debug, un rm -rf .next."
+    },
+    {
+      "kind": "cta",
+      "title": "La suite en **open**",
+      "body": "Repo GitHub : JulesDups/instagram-auto. Chaque décision d'archi, chaque bug, chaque métrique — publiés ici.",
+      "footer": "Travailler avec moi → bio"
+    }
+  ],
+  "caption": "Ce post a été généré et publié par le pipeline qu'il décrit.\n\ninstagram-auto : Claude.ai Scheduled Task → /api/intake → validation email → Instagram Graph API.\n\nStack : Next.js 16, Vercel Blob, Satori, Resend, Graph API v21.0.\n\nUn seul choix d'archi qui mérite un post : stocker les drafts en JSON dans le repo GitHub au lieu d'une DB. Versionné, debuggable, zero infra.\n\nBug marquant : proxy.ts vs middleware.ts. Export nommé = crash silencieux au runtime.\n\nRepo en accès libre si tu veux fouiller.\n\nTravailler avec moi → bio",
+  "hashtags": [
+    "buildinpublic",
+    "nextjs",
+    "vercel",
+    "instagram",
+    "automation",
+    "sideproject",
+    "typescript",
+    "developerlife",
+    "nextjs16",
+    "instagramapi",
+    "satori"
+  ]
+}
