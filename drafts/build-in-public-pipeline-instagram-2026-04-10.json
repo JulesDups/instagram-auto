@@ -20,7 +20,7 @@
     },
     {
       "kind": "content",
-      "title": "Pourquoi **open source** ?",
+      "title": "Pourquoi **raconter** ?",
       "body": "Pas par altruisme. Pour documenter mes choix en temps réel, voir ce qui tient et apprendre des retours. Build in public comme contrainte de qualité, pas comme stratégie marketing."
     },
     {
@@ -30,12 +30,12 @@
     },
     {
       "kind": "cta",
-      "title": "La suite en **open**",
-      "body": "Repo GitHub : JulesDups/instagram-auto. Chaque décision d'archi, chaque bug, chaque métrique — publiés ici.",
+      "title": "La suite **ici**",
+      "body": "Chaque décision d'archi, chaque bug marquant, chaque métrique — raconté slide par slide sur ce compte.",
       "footer": "Travailler avec moi → bio"
     }
   ],
-  "caption": "Ce post a été généré par le pipeline qu'il décrit.\n\ninstagram-auto : Claude.ai Scheduled Task commit un draft sur GitHub, je valide depuis mon dashboard Next.js, et la publication sur Instagram se fait en 20 secondes via Graph API.\n\nStack : Next.js 16, Vercel Blob, Satori pour les slides, Graph API v21.0.\n\nLe choix d'archi qui mérite un post : stocker les drafts en JSON dans le repo GitHub au lieu d'une DB. Versionné, debuggable, zéro infra.\n\nBug marquant de la semaine : proxy.ts vs middleware.ts en Next 16. Export nommé = crash silencieux au runtime.\n\nRepo en accès libre si tu veux fouiller.\n\nTravailler avec moi → bio",
+  "caption": "Ce post a été généré par le pipeline qu'il décrit.\n\ninstagram-auto : Claude.ai Scheduled Task commit un draft dans un repo privé, je valide depuis mon dashboard Next.js, et la publication sur Instagram se fait en 20 secondes via Graph API.\n\nStack : Next.js 16, Vercel Blob, Satori pour les slides, Graph API v21.0.\n\nLe choix d'archi qui mérite un post : stocker les drafts en JSON dans le repo au lieu d'une DB. Versionné, debuggable, zéro infra.\n\nBug marquant de la semaine : proxy.ts vs middleware.ts en Next 16. Export nommé = crash silencieux au runtime.\n\nTravailler avec moi → bio",
   "hashtags": [
     "buildinpublic",
     "nextjs",

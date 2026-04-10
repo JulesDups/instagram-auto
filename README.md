@@ -21,7 +21,7 @@ Next.js app (Vercel)
     └── /api/reject     ← lien signé email → noop
     │
     ▼
-Resend → 44779553+JulesDups@users.noreply.github.com
+Resend → <email destinataire dans .env.local>
     │
     │ [click "Publier"]
     ▼
@@ -77,7 +77,7 @@ Voir `.env.local.example`. Les variables sensibles doivent rester dans `.env.loc
 | `META_PAGE_ACCESS_TOKEN` | échange token via `oauth/access_token` puis `me/accounts`            |
 | `IG_BUSINESS_ACCOUNT_ID` | `PAGE_ID?fields=instagram_business_account` dans Graph API Explorer  |
 | `RESEND_API_KEY`         | resend.com → API Keys                                                |
-| `EMAIL_FROM`             | adresse vérifiée sur Resend (ex: `noreply@example.com`)     |
+| `EMAIL_FROM`             | adresse expéditeur sur un domaine vérifié dans Resend                 |
 | `EMAIL_TO`               | destinataire des drafts à valider                                    |
 | `INTAKE_SECRET`          | random 32 bytes hex (`crypto.randomBytes(32).toString('hex')`)       |
 | `DRAFT_TOKEN_SECRET`     | random 32 bytes hex                                                  |
