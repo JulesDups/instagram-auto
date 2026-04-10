@@ -14,6 +14,10 @@ const eslintConfig = defineConfig([
     "next-env.d.ts",
     // Operational utility scripts (not part of the app, not transpiled):
     ".scripts/**",
+    // Git worktrees live under .worktrees/<branch>/ and contain their own
+    // node_modules, .next and .scripts that should not be scanned by the root
+    // lint run.
+    ".worktrees/**",
   ]),
 ]);
 
