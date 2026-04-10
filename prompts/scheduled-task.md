@@ -74,7 +74,7 @@ Convention `**emphase**` : entoure UN mot ou une courte expression par titre/bod
 
 6. POST le JSON sur `https://instagram-auto.vercel.app/api/intake` avec :
    - Header `Content-Type: application/json`
-   - Header `x-intake-secret: REMPLACE_PAR_LA_VRAIE_VALEUR_DE_INTAKE_SECRET`
+   - Header `x-intake-secret: 00517088da24bd790ebd3fea9a4500159a8715b2f582d92e505d5f1a0f224396`
    - Body : le JSON tel quel
 7. Vérifie le status code de la réponse :
    - 200 → l'app a accepté le draft, l'email de validation a été envoyé. Continue à l'étape 8.
