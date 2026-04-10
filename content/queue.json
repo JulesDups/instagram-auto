@@ -7,12 +7,6 @@
       "cta": true
     },
     {
-      "theme": "build-in-public",
-      "angle": "Jour 1 — Je code en open un pipeline carousel Instagram automatisé",
-      "notes": "Présentation du projet instagram-auto. Stack, pourquoi en open, ce que je veux apprendre. Méta : ce post a été publié par le pipeline lui-même.",
-      "cta": true
-    },
-    {
       "theme": "tech-decryption",
       "angle": "Prisma vs Drizzle en 2026 : ce qui a vraiment changé",
       "notes": "Migration tooling, types inference, Edge compat. Mon retour après 3 ans Prisma + 6 mois Drizzle sur side projects."
