@@ -1,6 +1,8 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { COOKIE_NAME, verifySessionCookie } from "@/lib/auth";
 
+export const runtime = "nodejs";
+
 const PUBLIC_PATHS = ["/login", "/api/auth/login"];
 
 const PUBLIC_PREFIXES = [
