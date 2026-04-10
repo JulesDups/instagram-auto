@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { COOKIE_NAME, verifySessionCookie } from "@/lib/auth";
-
-export const runtime = "nodejs";
+// Note: Next.js 16 proxy.ts always runs on Node.js runtime; exporting `runtime`
+// is explicitly forbidden and causes a startup error.
 
 const PUBLIC_PATHS = ["/login", "/api/auth/login"];
 
@@ -19,7 +19,7 @@ function isPublic(pathname: string): boolean {
   return PUBLIC_PREFIXES.some((prefix) => pathname.startsWith(prefix));
 }
 
-export function proxy(request: NextRequest) {
+export default function proxy(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
 
   if (isPublic(pathname)) {
