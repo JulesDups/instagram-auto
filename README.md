@@ -1,36 +1,110 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# instagram-auto
 
-## Getting Started
+Pipeline automatisé de génération, rendu et publication de carousels Instagram.
+Trois thèmes : Claude Code, automation, création de contenu IA.
 
-First, run the development server:
+## Architecture
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+```
+Claude.ai (Scheduled Task)
+    │
+    │ [POST JSON via webhook]
+    ▼
+GitHub repo (drafts/*.json)
+    │
+    │ [auto-deploy on push]
+    ▼
+Next.js app (Vercel)
+    ├── /api/intake     ← webhook receiver, valide & envoie l'email
+    ├── /api/render     ← rend une slide en PNG via next/og
+    ├── /api/publish    ← lien signé email → upload Blob + Instagram Graph
+    └── /api/reject     ← lien signé email → noop
+    │
+    ▼
+Resend → julesdupspro@gmail.com
+    │
+    │ [click "Publier"]
+    ▼
+Vercel Blob (PNG hosting) → Instagram Graph API → @julesd.dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Stack
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- Next.js 16 (App Router, Turbopack, React Compiler)
+- React 19
+- TypeScript strict
+- Tailwind CSS v4
+- Zod (validation)
+- Resend (email)
+- @vercel/blob (image hosting)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Structure
 
-## Learn More
+```
+instagram-auto/
+├── app/
+│   ├── page.tsx                           # liste des drafts
+│   ├── preview/[draftId]/page.tsx         # aperçu HTML d'un draft
+│   └── api/
+│       ├── intake/route.ts                # webhook depuis Claude.ai
+│       ├── render/[draftId]/[index]/      # ImageResponse → PNG 1080×1080
+│       ├── publish/route.ts               # lien signé → publish to IG
+│       └── reject/route.ts                # lien signé → noop
+├── lib/
+│   ├── env.ts                             # env vars typées (Zod)
+│   ├── content.ts                         # types Draft / Slide / Theme
+│   ├── drafts.ts                          # I/O drafts (lecture/écriture JSON)
+│   ├── instagram.ts                       # Graph API client
+│   ├── publish.ts                         # orchestration render → blob → IG
+│   ├── email.ts                           # template email Resend
+│   └── tokens.ts                          # HMAC signed tokens (publier/rejeter)
+├── templates/
+│   ├── slide-hook.tsx                     # template slide d'accroche
+│   ├── slide-content.tsx                  # template slide de contenu
+│   └── slide-cta.tsx                      # template slide CTA
+└── drafts/
+    └── sample.json                        # draft d'exemple
+```
 
-To learn more about Next.js, take a look at the following resources:
+## Variables d'environnement
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Voir `.env.local.example`. Les variables sensibles doivent rester dans `.env.local` (git-ignored).
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+| Variable                 | Source                                                               |
+| ------------------------ | -------------------------------------------------------------------- |
+| `META_APP_ID`            | developers.facebook.com → app → Paramètres → Général                 |
+| `META_APP_SECRET`        | idem                                                                 |
+| `META_PAGE_ACCESS_TOKEN` | échange token via `oauth/access_token` puis `me/accounts`            |
+| `IG_BUSINESS_ACCOUNT_ID` | `PAGE_ID?fields=instagram_business_account` dans Graph API Explorer  |
+| `RESEND_API_KEY`         | resend.com → API Keys                                                |
+| `EMAIL_FROM`             | adresse vérifiée sur Resend (ex: `instagram-bot@julesdupuis.fr`)     |
+| `EMAIL_TO`               | destinataire des drafts à valider                                    |
+| `INTAKE_SECRET`          | random 32 bytes hex (`crypto.randomBytes(32).toString('hex')`)       |
+| `DRAFT_TOKEN_SECRET`     | random 32 bytes hex                                                  |
+| `BLOB_READ_WRITE_TOKEN`  | provisionné par `vercel integration add` ou Marketplace              |
+| `PUBLIC_BASE_URL`        | `http://localhost:3000` en dev, URL Vercel en prod                   |
 
-## Deploy on Vercel
+## Commandes
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+npm run dev       # serveur dev sur :3000
+npm run build     # build production
+npm run lint      # ESLint
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Flux de validation
+
+1. Une **Scheduled Task Claude.ai** s'exécute chaque matin et POST un JSON sur `/api/intake` avec le header `x-intake-secret`.
+2. L'app valide le draft, l'enregistre dans `drafts/`, et envoie un email Resend à `EMAIL_TO` avec aperçu des slides + caption + deux liens signés (publier / rejeter).
+3. Si le destinataire clique **Publier**, l'app rend chaque slide en PNG via `/api/render`, les uploade sur Vercel Blob, puis appelle l'API Instagram Graph pour créer et publier le carousel.
+4. Si le destinataire clique **Rejeter**, l'app affiche une confirmation et rien n'est publié.
+
+## Tester en local
+
+1. Copier `.env.local.example` en `.env.local` et remplir les variables (au minimum `META_PAGE_ACCESS_TOKEN` et `META_APP_SECRET`, le reste est déjà rempli).
+2. `npm run dev`
+3. Ouvrir `http://localhost:3000` → liste des drafts.
+4. Cliquer sur `sample` → aperçu HTML avec les 7 slides rendues.
+5. `http://localhost:3000/api/render/sample/0` → PNG direct de la première slide.
+
+Pour publier réellement, il faut soit déployer sur Vercel (les URLs deviennent publiques pour Instagram), soit exposer le port via ngrok et mettre `PUBLIC_BASE_URL` à l'URL ngrok.
