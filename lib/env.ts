@@ -17,6 +17,11 @@ const envSchema = z.object({
   BLOB_READ_WRITE_TOKEN: z.string().optional(),
 
   PUBLIC_BASE_URL: z.string().url(),
+
+  DASHBOARD_PASSWORD: z.string().min(8, "Minimum 8 caractères"),
+  DASHBOARD_COOKIE_SECRET: z
+    .string()
+    .regex(/^[a-f0-9]{64}$/, "Doit être 32 bytes hex (64 caractères hex)"),
 });
 
 export type Env = z.infer<typeof envSchema>;
