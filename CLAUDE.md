@@ -45,26 +45,65 @@ Claude.ai Scheduled Task ──POST x-intake-secret──▶ /api/intake
 
 ## Files (read these instead of grepping)
 
+### Lib
+
 | Path | Role |
 |---|---|
 | `lib/env.ts` | Zod-typed env, lazy cached, throws if invalid |
+| `lib/auth.ts` | Cookie HMAC SHA256 sign/verify + `comparePassword` (timingSafeEqual), COOKIE_NAME `dashboard-session`, TTL 30d |
 | `lib/content.ts` | `DraftSchema`, `SlideSchema`, `Theme` (3 pillars), `themeLabel`, `buildFullCaption`, `parseEmphasis`, `PILLAR_TARGET_DISTRIBUTION` |
-| `lib/drafts.ts` | fs I/O on `drafts/*.json` (`loadDraft`, `listDraftIds`, `saveDraft`) |
+| `lib/drafts.ts` | fs I/O on `drafts/*.json` + `getDraftsWithStatus()` joining drafts with published manifest |
 | `lib/queue.ts` | fs I/O on `content/queue.json` (`loadQueue`, `saveQueue`, `QueueItemSchema`) |
+| `lib/published.ts` | Vercel Blob manifest `meta/published.json`, `loadManifest` + `appendToManifest` |
+| `lib/stats.ts` | Overview helpers: weekly counts, last-7d distribution vs 50/30/20 target, `formatRelativeFrench` |
 | `lib/instagram.ts` | Graph API client + `waitForContainerReady` polling + `publishCarousel` |
-| `lib/publish.ts` | `publishDraft(draftId)` orchestration render→Blob→IG |
+| `lib/publish.ts` | `publishDraft(draftId)` orchestration render→Blob→IG→manifest |
 | `lib/email.ts` | Resend HTML draft review email with inline slide previews |
 | `lib/tokens.ts` | `createDraftToken` / `verifyDraftToken`, HMAC SHA256, base64url, 7d default TTL |
-| `templates/slide-hook.tsx` | Cream bg + dark teal title + tan accent label + swipe footer |
-| `templates/slide-content.tsx` | Cream bg + numbered indicator + tan accent rule |
-| `templates/slide-cta.tsx` | Inverted: dark teal bg + cream text + tan accent (visual close) |
+
+### Middleware
+
+| Path | Role |
+|---|---|
+| `proxy.ts` (root) | Next.js 16 middleware. **Must use `export default function proxy(...)`.** Gates UI routes behind session cookie, exempts `/api/*`, `/_next/*`, `/favicon`, `/login`. Redirects `/` → `/overview` when authed. |
+
+### App routes (public)
+
+| Path | Role |
+|---|---|
+| `app/login/page.tsx` | Login form (no auth) |
+| `app/api/auth/login/route.ts` | POST password → signed session cookie |
+| `app/api/auth/logout/route.ts` | POST → clear cookie |
 | `app/api/intake/route.ts` | POST, validates `x-intake-secret`, parses Draft, persists, sends email |
 | `app/api/render/[draftId]/[index]/route.tsx` | `next/og` `ImageResponse`, runtime nodejs |
 | `app/api/publish/route.ts` | GET signed link, runtime nodejs, `maxDuration = 300` |
 | `app/api/reject/route.ts` | GET signed link, returns confirmation HTML |
-| `app/preview/[draftId]/page.tsx` | Server component grid preview, async `params` |
-| `app/page.tsx` | Lists drafts via `listDraftIds()` |
-| `app/queue/page.tsx` | Editorial dashboard: queue (up next) + published (history), theme counts |
+
+### App routes (behind auth, route group `(dashboard)`)
+
+| Path | Role |
+|---|---|
+| `app/(dashboard)/layout.tsx` | Sidebar fixed 240px + max-w 1280px main, cream theme |
+| `app/(dashboard)/overview/page.tsx` | 4 stat cards: Queue restante / Publiés cette semaine / Dernier post / Distribution 7 derniers jours |
+| `app/(dashboard)/queue/page.tsx` | Editorial queue (up next + published history + theme counts) |
+| `app/(dashboard)/library/page.tsx` | Tabs `All` / `Published`, grid 3-col of draft cards |
+| `app/(dashboard)/preview/[draftId]/page.tsx` | Slides grid + publish status banner (mediaId + IG link) + caption |
+
+### Components (Server by default, Client marked with `"use client"`)
+
+| Path | Role |
+|---|---|
+| `components/sidebar.tsx` | **Client.** Fixed-left nav with `usePathname()` for active state + logout form |
+| `components/pillar-badge.tsx` | Server. Small colored badge per pillar (cream/teal/tan/red palette) |
+| `components/stat-card.tsx` | Server. Generic card (label/value/hint/children) |
+| `components/distribution-bar.tsx` | Server. 3-segment horizontal bar with optional labels + target indicators |
+| `components/draft-card.tsx` | Server. Thumbnail via `/api/render/{id}/0` + title + pillar + published state |
+| `components/tabs.tsx` | Server. URL-based tabs via `?tab=` query param |
+
+### Content
+
+| Path | Role |
+|---|---|
 | `content/queue.json` | Editorial queue (FIFO), seeded with 15 items across the 3 pillars |
 | `drafts/sample.json` | 7-slide test draft, theme `tech-decryption` |
 
@@ -122,13 +161,21 @@ Use sparingly: 1 punchline per slide max, mirroring the user's site (`Vous crée
 | All Meta IDs and secrets | in `.env.local` (gitignored) |
 | Resend domain | verified, reused from `~/Documents/dev/actif/Portfolio/.env` |
 | `INTAKE_SECRET`, `DRAFT_TOKEN_SECRET` | random 32-byte hex, generated at scaffold |
-| `BLOB_READ_WRITE_TOKEN` | **TODO** : `vercel integration add` (Blob) |
-| Vercel link | not yet (`vercel link` pending) |
-| GitHub repo | not yet (`gh repo create instagram-auto --private`) |
+| `DASHBOARD_PASSWORD` | random, in `.env.local` and Vercel env vars (prod + dev) |
+| `DASHBOARD_COOKIE_SECRET` | 32-byte hex HMAC secret, same storage |
+| `BLOB_READ_WRITE_TOKEN` | provisioned via Vercel dashboard, store `instagram-auto-prod` |
+| Vercel link | `julesdups-project/instagram-auto`, alias `https://instagram-auto.vercel.app` |
+| GitHub repo | `github.com/JulesDups/instagram-auto` (private) |
 
 ## Gotchas (cost real time if missed)
 
-- **Next.js 16 breaking** : `middleware.ts` → `proxy.ts`, `params`/`searchParams`/`cookies()`/`headers()` are async, `unstable_cache` → `'use cache'` directive, `experimental.ppr` → top-level `cacheComponents: true`. See `node_modules/next/dist/docs/`.
+- **Next.js 16 `proxy.ts` requires `export default`**. An `export function proxy(...)` named export compiles and lints fine but crashes at runtime with `TypeError: adapterFn is not a function` on every request. Always use `export default function proxy(request: NextRequest) { ... }`.
+- **`export const runtime = "nodejs"` is forbidden on `proxy.ts`**. Next.js 16 forces Node.js runtime for proxy files and throws "Route segment config is not allowed in Proxy file" at boot if you try. Omit the runtime export.
+- **Turbopack cache corruption**. If routes start returning 500 with `adapterFn is not a function` out of nowhere, `rm -rf .next` and restart the dev server. The cache gets into a stale state when middleware/proxy files change significantly.
+- **Turbopack workspace root detection in git worktrees**. Without `turbopack.root` in `next.config.ts`, Next picks the parent repo's `package-lock.json` and serves the wrong files. Pin it to `import.meta.dirname`.
+- **Vercel link is per-worktree**. `.vercel/` is gitignored so it's not shared between worktrees. When creating a new worktree, copy `.vercel/` from the main repo or re-run `vercel link`.
+- **`vercel env pull` needs a linked worktree**. Without it, you can't fetch Blob tokens and the dev server crashes when `/overview` tries to read the manifest.
+- **Next.js 16 breaking** : `middleware.ts` → `proxy.ts`, `params`/`searchParams`/`cookies()`/`headers()` are async, `unstable_cache` → `'use cache'` directive, `experimental.ppr` → top-level `cacheComponents: true`.
 - **Satori (next/og)** : every flex container needs explicit `display: "flex"` (otherwise silent layout breakage). No Tailwind class strings — use inline `style` objects. Limited CSS subset, no `gap` on non-flex, no transforms. Use `rgba()` for opacity, not `opacity` prop on parent.
 - **Instagram Graph carousel** : image URLs MUST be publicly fetchable (localhost fails — use Vercel Blob or ngrok). Containers are async — must poll `status_code` until `FINISHED` before publish, can take 10–60s. Carousel children: min 2, max 10. Use Graph API `v21.0`.
 - **Resend** : `EMAIL_FROM` must be on a verified domain.
