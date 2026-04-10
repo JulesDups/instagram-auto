@@ -1,0 +1,83 @@
+{
+  "items": [
+    {
+      "theme": "tech-decryption",
+      "angle": "Next.js Cache Components vs ISR : quand utiliser quoi en 2026",
+      "notes": "Démystifier le 'use cache directive', cacheLife, cacheTag. Trade-offs réels vs revalidate. Mes choix sur instagram-auto.",
+      "cta": true
+    },
+    {
+      "theme": "build-in-public",
+      "angle": "Jour 1 — Je code en open un pipeline carousel Instagram automatisé",
+      "notes": "Présentation du projet instagram-auto. Stack, pourquoi en open, ce que je veux apprendre. Méta : ce post a été publié par le pipeline lui-même.",
+      "cta": true
+    },
+    {
+      "theme": "tech-decryption",
+      "angle": "Prisma vs Drizzle en 2026 : ce qui a vraiment changé",
+      "notes": "Migration tooling, types inference, Edge compat. Mon retour après 3 ans Prisma + 6 mois Drizzle sur side projects."
+    },
+    {
+      "theme": "human-pro",
+      "angle": "6 mois avant de passer freelance : ce que j'aurais voulu savoir",
+      "notes": "Préparation chez HegoaTek vers freelance 2026. Vrais chiffres, vraies peurs, ce qui a marché. Ton honnête, pas donneur de leçons.",
+      "cta": true
+    },
+    {
+      "theme": "tech-decryption",
+      "angle": "Server Components ne sont pas la solution à tout (et voici quand)",
+      "notes": "Hot take. Les cas où je préfère encore les Client Components ou des Server Actions classiques. Exemples concrets."
+    },
+    {
+      "theme": "build-in-public",
+      "angle": "Architecture decision : pourquoi GitHub repo as mailbox plutôt qu'un webhook direct",
+      "notes": "Décision sur instagram-auto. Pour vs contre, latence, debuggabilité, history versionnée. Slide finale : qu'est-ce que tu aurais choisi ?"
+    },
+    {
+      "theme": "tech-decryption",
+      "angle": "Tailwind v4 : les 3 features qui valent vraiment l'upgrade",
+      "notes": "@theme, OKLCH par défaut, performance compile. Ce que j'aimais pas en v3 et qui est résolu."
+    },
+    {
+      "theme": "build-in-public",
+      "angle": "Le bug stdin qui m'a fait perdre 30 minutes (bash + Vercel CLI)",
+      "notes": "Anecdote du jour : while read line < file qui se bouffe le stdin par les commandes internes. La leçon : </dev/null sur les commandes dans une boucle while."
+    },
+    {
+      "theme": "tech-decryption",
+      "angle": "NestJS vs Express : le verdict après 3 ans en prod",
+      "notes": "Pas un comparatif tiède. Quand NestJS est rentable, quand Express reste mieux. Mon retour HegoaTek."
+    },
+    {
+      "theme": "human-pro",
+      "angle": "3 ressources qui ont changé ma façon de coder (ni livres marketing, ni MOOC)",
+      "notes": "Jamais les recommandations bateau. Ressources concrètes : un repo, une chaîne, une newsletter ou une lib. Pourquoi chacune, et l'apprentissage transférable."
+    },
+    {
+      "theme": "tech-decryption",
+      "angle": "shadcn/ui : pourquoi je ne reviendrai jamais à Material UI",
+      "notes": "Code ownership, customisation, build size, dev experience. Avec un before/after concret d'un même composant.",
+      "cta": true
+    },
+    {
+      "theme": "build-in-public",
+      "angle": "React + Satori vs Canva pour générer des carousels : j'ai mesuré",
+      "notes": "Build instagram-auto. Coût, temps de génération, contrôle, limites. Tableau chiffré. Ce post a été rendu par Satori, méta encore."
+    },
+    {
+      "theme": "tech-decryption",
+      "angle": "Angular 21 : ce que la communauté React rate vraiment",
+      "notes": "Mon background Angular 5 ans. Signals, defer, control flow. Pas du chauvinisme, des features qui mériteraient d'exister côté React."
+    },
+    {
+      "theme": "human-pro",
+      "angle": "Setup remote au Pays Basque : ce qui marche, ce qui rate",
+      "notes": "Environnement de travail concret. Outils (Zed, VS Code, Antigravity). Routine. Pourquoi vivre en Pays Basque change comment je code. Apprentissages transférables."
+    },
+    {
+      "theme": "tech-decryption",
+      "angle": "Bun vs Node en 2026 : 5 cas où le switch est rentable",
+      "notes": "Pas un fanboy post. Cas concrets : scripts, side projects, monorepo, runtime production. Ce qui marche pas encore."
+    }
+  ]
+}
