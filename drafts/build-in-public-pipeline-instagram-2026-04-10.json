@@ -15,8 +15,8 @@
     },
     {
       "kind": "content",
-      "title": "Un seul **garde-fou** humain : l'email",
-      "body": "Le draft déclenche un email avec preview des slides et deux liens HMAC signés : Publier ou Rejeter. Rien ne part sans ce clic."
+      "title": "Un seul **garde-fou** humain : le dashboard",
+      "body": "Le draft atterrit dans /library derrière un login. Je regarde les slides, je clique Publier, 20 secondes plus tard le carousel est sur mon compte. Zéro script à lancer, zéro token à copier."
     },
     {
       "kind": "content",
@@ -26,7 +26,7 @@
     {
       "kind": "content",
       "title": "Le piège que j'aurais aimé éviter : **proxy.ts**",
-      "body": "Next.js 16 renomme middleware.ts en proxy.ts. Un export nommé compile sans erreur — mais crashe silencieusement au runtime. 1h de debug, un rm -rf .next."
+      "body": "Next.js 16 renomme middleware.ts en proxy.ts. Un export nommé compile sans erreur — mais crashe silencieusement au runtime avec un TypeError interne. 30 minutes de debug, un rm -rf .next."
     },
     {
       "kind": "cta",
@@ -35,7 +35,7 @@
       "footer": "Travailler avec moi → bio"
     }
   ],
-  "caption": "Ce post a été généré et publié par le pipeline qu'il décrit.\n\ninstagram-auto : Claude.ai Scheduled Task → /api/intake → validation email → Instagram Graph API.\n\nStack : Next.js 16, Vercel Blob, Satori, Resend, Graph API v21.0.\n\nUn seul choix d'archi qui mérite un post : stocker les drafts en JSON dans le repo GitHub au lieu d'une DB. Versionné, debuggable, zero infra.\n\nBug marquant : proxy.ts vs middleware.ts. Export nommé = crash silencieux au runtime.\n\nRepo en accès libre si tu veux fouiller.\n\nTravailler avec moi → bio",
+  "caption": "Ce post a été généré par le pipeline qu'il décrit.\n\ninstagram-auto : Claude.ai Scheduled Task commit un draft sur GitHub, je valide depuis mon dashboard Next.js, et la publication sur Instagram se fait en 20 secondes via Graph API.\n\nStack : Next.js 16, Vercel Blob, Satori pour les slides, Graph API v21.0.\n\nLe choix d'archi qui mérite un post : stocker les drafts en JSON dans le repo GitHub au lieu d'une DB. Versionné, debuggable, zéro infra.\n\nBug marquant de la semaine : proxy.ts vs middleware.ts en Next 16. Export nommé = crash silencieux au runtime.\n\nRepo en accès libre si tu veux fouiller.\n\nTravailler avec moi → bio",
   "hashtags": [
     "buildinpublic",
     "nextjs",
