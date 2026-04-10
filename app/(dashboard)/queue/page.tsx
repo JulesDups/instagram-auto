@@ -1,6 +1,7 @@
 import { loadQueue } from "@/lib/queue";
 import { listDraftIds, loadDraft } from "@/lib/drafts";
-import { themeLabel, stripEmphasis, type Draft } from "@/lib/content";
+import { stripEmphasis, type Draft } from "@/lib/content";
+import { PillarBadge } from "@/components/pillar-badge";
 
 export const dynamic = "force-dynamic";
 
@@ -27,28 +28,33 @@ export default async function QueuePage() {
   }
 
   return (
-    <main className="mx-auto max-w-3xl px-6 py-16 text-zinc-100">
+    <div>
       <header className="mb-12">
-        <div className="text-xs uppercase tracking-widest text-amber-400">
+        <div className="text-xs uppercase tracking-widest text-[#D4A374]">
           editorial queue
         </div>
-        <h1 className="mt-2 text-4xl font-bold">Calendrier éditorial</h1>
-        <p className="mt-3 text-zinc-400">
+        <h1 className="mt-2 text-3xl font-bold text-[#1C343A]">
+          Calendrier éditorial
+        </h1>
+        <p className="mt-3 text-[#1C343A]/60">
           {queue.items.length} sujet
           {queue.items.length === 1 ? "" : "s"} en attente · {drafts.length}{" "}
           draft{drafts.length === 1 ? "" : "s"} publié
           {drafts.length === 1 ? "" : "s"}
         </p>
         {queue.items.length > 0 && (
-          <div className="mt-4 flex flex-wrap gap-2 text-xs">
+          <div className="mt-4 flex flex-wrap gap-2">
             {(["tech-decryption", "build-in-public", "human-pro"] as const).map(
               (theme) => (
-                <span
+                <div
                   key={theme}
-                  className="rounded-full border border-zinc-800 bg-zinc-900 px-3 py-1 text-zinc-400"
+                  className="inline-flex items-center gap-2 rounded-full border border-[#1C343A]/10 bg-white px-3 py-1"
                 >
-                  {themeLabel(theme)} · {counts[theme] ?? 0}
-                </span>
+                  <PillarBadge theme={theme} />
+                  <span className="text-xs font-semibold text-[#1C343A]/70">
+                    {counts[theme] ?? 0}
+                  </span>
+                </div>
               ),
             )}
           </div>
@@ -56,11 +62,11 @@ export default async function QueuePage() {
       </header>
 
       <section className="mb-16">
-        <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-zinc-500">
+        <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-[#1C343A]/50">
           Up next
         </h2>
         {queue.items.length === 0 ? (
-          <p className="rounded-lg border border-zinc-800 bg-zinc-900 px-4 py-3 text-zinc-500">
+          <p className="rounded-lg border border-[#1C343A]/10 bg-white px-4 py-3 text-[#1C343A]/50">
             Queue vide. Le prochain run de Claude.ai task piochera un thème
             sous-représenté automatiquement.
           </p>
@@ -69,25 +75,25 @@ export default async function QueuePage() {
             {queue.items.map((item, i) => (
               <li
                 key={i}
-                className="flex gap-4 rounded-lg border border-zinc-800 bg-zinc-900 p-4"
+                className="flex gap-4 rounded-lg border border-[#1C343A]/10 bg-white p-4"
               >
-                <div className="font-mono text-2xl font-bold text-zinc-700">
+                <div className="font-mono text-2xl font-bold text-[#1C343A]/20">
                   {String(i + 1).padStart(2, "0")}
                 </div>
                 <div className="flex-1">
-                  <div className="flex items-center gap-2 text-xs uppercase tracking-wider">
-                    <span className="text-amber-400">
-                      {themeLabel(item.theme)}
-                    </span>
+                  <div className="flex items-center gap-2">
+                    <PillarBadge theme={item.theme} />
                     {item.cta && (
-                      <span className="rounded-full bg-rose-500/15 px-2 py-0.5 text-rose-400">
+                      <span className="rounded-full bg-[#BF2C23]/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-[#BF2C23]">
                         CTA hard
                       </span>
                     )}
                   </div>
-                  <div className="mt-1 font-medium">{item.angle}</div>
+                  <div className="mt-2 font-medium text-[#1C343A]">
+                    {item.angle}
+                  </div>
                   {item.notes && (
-                    <div className="mt-2 text-sm text-zinc-500">
+                    <div className="mt-2 text-sm text-[#1C343A]/50">
                       {item.notes}
                     </div>
                   )}
@@ -99,11 +105,11 @@ export default async function QueuePage() {
       </section>
 
       <section>
-        <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-zinc-500">
+        <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-[#1C343A]/50">
           Published
         </h2>
         {drafts.length === 0 ? (
-          <p className="rounded-lg border border-zinc-800 bg-zinc-900 px-4 py-3 text-zinc-500">
+          <p className="rounded-lg border border-[#1C343A]/10 bg-white px-4 py-3 text-[#1C343A]/50">
             Aucun draft pour l&apos;instant.
           </p>
         ) : (
@@ -111,16 +117,14 @@ export default async function QueuePage() {
             {drafts.map((d) => (
               <li
                 key={d.id}
-                className="rounded-lg border border-zinc-800 bg-zinc-900 transition hover:border-amber-500/50"
+                className="rounded-lg border border-[#1C343A]/10 bg-white transition hover:border-[#D4A374]/60"
               >
                 <a href={`/preview/${d.id}`} className="block p-4">
-                  <div className="text-xs uppercase tracking-wider text-amber-400">
-                    {themeLabel(d.theme)}
-                  </div>
-                  <div className="mt-1 font-medium">
+                  <PillarBadge theme={d.theme} />
+                  <div className="mt-2 font-medium text-[#1C343A]">
                     {stripEmphasis(d.slides[0]?.title ?? d.id)}
                   </div>
-                  <div className="mt-2 text-xs text-zinc-500">
+                  <div className="mt-2 text-xs text-[#1C343A]/50">
                     {d.id} ·{" "}
                     {new Date(d.createdAt).toLocaleString("fr-FR", {
                       dateStyle: "long",
@@ -134,6 +138,6 @@ export default async function QueuePage() {
           </ul>
         )}
       </section>
-    </main>
+    </div>
   );
 }
