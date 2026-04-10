@@ -1,6 +1,7 @@
 import { loadDraft } from "@/lib/drafts";
-import { themeLabel, buildFullCaption } from "@/lib/content";
+import { buildFullCaption } from "@/lib/content";
 import { notFound } from "next/navigation";
+import { PillarBadge } from "@/components/pillar-badge";
 
 export default async function PreviewPage({
   params,
@@ -17,13 +18,13 @@ export default async function PreviewPage({
   }
 
   return (
-    <main className="mx-auto max-w-3xl px-6 py-16 text-zinc-100">
+    <div>
       <div className="mb-8">
-        <div className="text-xs uppercase tracking-widest text-sky-400">
-          {themeLabel(draft.theme)}
-        </div>
-        <h1 className="mt-2 text-3xl font-bold">Draft {draft.id}</h1>
-        <p className="mt-1 text-sm text-zinc-500">
+        <PillarBadge theme={draft.theme} />
+        <h1 className="mt-3 text-3xl font-bold text-[#1C343A]">
+          Draft {draft.id}
+        </h1>
+        <p className="mt-1 text-sm text-[#1C343A]/50">
           Créé le{" "}
           {new Date(draft.createdAt).toLocaleString("fr-FR", {
             dateStyle: "long",
@@ -33,11 +34,11 @@ export default async function PreviewPage({
         </p>
       </div>
 
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+      <div className="grid grid-cols-3 gap-4">
         {draft.slides.map((slide, i) => (
           <div
             key={i}
-            className="overflow-hidden rounded-xl border border-zinc-800 bg-zinc-900"
+            className="overflow-hidden rounded-xl border border-[#1C343A]/10 bg-white"
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
@@ -47,7 +48,7 @@ export default async function PreviewPage({
               height={1080}
               className="aspect-square w-full object-cover"
             />
-            <div className="border-t border-zinc-800 px-3 py-2 text-xs text-zinc-500">
+            <div className="border-t border-[#1C343A]/10 px-3 py-2 text-xs text-[#1C343A]/50">
               {i + 1}. {slide.kind}
             </div>
           </div>
@@ -55,13 +56,13 @@ export default async function PreviewPage({
       </div>
 
       <section className="mt-12">
-        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-zinc-400">
+        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-[#1C343A]/50">
           Caption
         </h2>
-        <pre className="whitespace-pre-wrap rounded-lg border border-zinc-800 bg-zinc-900 p-4 text-sm text-zinc-200">
+        <pre className="whitespace-pre-wrap rounded-lg border border-[#1C343A]/10 bg-white p-4 text-sm text-[#1C343A]">
           {buildFullCaption(draft)}
         </pre>
       </section>
-    </main>
+    </div>
   );
 }
