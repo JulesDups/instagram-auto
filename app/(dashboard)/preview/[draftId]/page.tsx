@@ -2,6 +2,8 @@ import { loadDraft } from "@/lib/drafts";
 import { buildFullCaption } from "@/lib/content";
 import { notFound } from "next/navigation";
 import { PillarBadge } from "@/components/pillar-badge";
+import { loadManifest } from "@/lib/published";
+import { formatRelativeFrench } from "@/lib/stats";
 
 export default async function PreviewPage({
   params,
@@ -17,9 +19,13 @@ export default async function PreviewPage({
     notFound();
   }
 
+  const { manifest } = await loadManifest();
+  const publishedEntry =
+    manifest.entries.find((e) => e.draftId === draft.id) ?? null;
+
   return (
     <div>
-      <div className="mb-8">
+      <div className="mb-6">
         <PillarBadge theme={draft.theme} />
         <h1 className="mt-3 text-3xl font-bold text-[#1C343A]">
           Draft {draft.id}
@@ -32,6 +38,43 @@ export default async function PreviewPage({
           })}{" "}
           · {draft.slides.length} slides
         </p>
+      </div>
+
+      <div className="mb-8 rounded-xl border border-[#1C343A]/10 bg-white p-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            {publishedEntry ? (
+              <>
+                <span className="h-2 w-2 rounded-full bg-emerald-500" />
+                <span className="text-sm font-semibold text-emerald-600">
+                  Publié {formatRelativeFrench(publishedEntry.publishedAt)}
+                </span>
+              </>
+            ) : (
+              <>
+                <span className="h-2 w-2 rounded-full bg-[#1C343A]/20" />
+                <span className="text-sm text-[#1C343A]/50">
+                  Pas encore publié
+                </span>
+              </>
+            )}
+          </div>
+          {publishedEntry && (
+            <a
+              href="https://www.instagram.com/julesd.dev/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-xs text-[#D4A374] underline"
+            >
+              Voir sur Instagram
+            </a>
+          )}
+        </div>
+        {publishedEntry && (
+          <div className="mt-2 text-xs text-[#1C343A]/40">
+            Media ID : <code className="font-mono">{publishedEntry.mediaId}</code>
+          </div>
+        )}
       </div>
 
       <div className="grid grid-cols-3 gap-4">
