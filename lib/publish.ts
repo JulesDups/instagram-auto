@@ -4,14 +4,33 @@ import { env } from "./env";
 import { loadDraft } from "./drafts";
 import { publishCarousel, type PublishCarouselResult } from "./instagram";
 import { buildFullCaption } from "./content";
-import { appendToManifest } from "./published";
+import { appendToManifest, loadManifest } from "./published";
 
 export interface PublishDraftResult extends PublishCarouselResult {
   draftId: string;
   imageUrls: string[];
 }
 
-export async function publishDraft(draftId: string): Promise<PublishDraftResult> {
+export class AlreadyPublishedError extends Error {
+  constructor(
+    public readonly draftId: string,
+    public readonly mediaId: string,
+  ) {
+    super(`Draft ${draftId} already published as media ${mediaId}`);
+    this.name = "AlreadyPublishedError";
+  }
+}
+
+export async function publishDraft(
+  draftId: string,
+): Promise<PublishDraftResult> {
+  // Idempotence : refuse de publier 2× le même draftId.
+  const { manifest } = await loadManifest();
+  const existing = manifest.entries.find((e) => e.draftId === draftId);
+  if (existing) {
+    throw new AlreadyPublishedError(draftId, existing.mediaId);
+  }
+
   const draft = await loadDraft(draftId);
   const base = env().PUBLIC_BASE_URL;
 

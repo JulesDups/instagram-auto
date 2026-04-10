@@ -59,7 +59,7 @@ export default async function PreviewPage({
               </>
             )}
           </div>
-          {publishedEntry && (
+          {publishedEntry ? (
             <a
               href="https://www.instagram.com/julesd.dev/"
               target="_blank"
@@ -68,12 +68,32 @@ export default async function PreviewPage({
             >
               Voir sur Instagram
             </a>
+          ) : (
+            <form
+              action={`/api/dashboard-publish/${draft.id}`}
+              method="POST"
+            >
+              <button
+                type="submit"
+                className="rounded-lg bg-[#1C343A] px-4 py-2 text-sm font-semibold text-[#FBFAF8] transition hover:bg-[#1C343A]/90"
+              >
+                Publier sur Instagram
+              </button>
+            </form>
           )}
         </div>
         {publishedEntry && (
           <div className="mt-2 text-xs text-[#1C343A]/40">
-            Media ID : <code className="font-mono">{publishedEntry.mediaId}</code>
+            Media ID :{" "}
+            <code className="font-mono">{publishedEntry.mediaId}</code>
           </div>
+        )}
+        {!publishedEntry && (
+          <p className="mt-3 text-xs text-[#1C343A]/40">
+            Le clic déclenche le rendu des slides en PNG, l&apos;upload sur
+            Vercel Blob, puis la publication via Instagram Graph API. Compte
+            ~20-30 secondes avant de voir le résultat.
+          </p>
         )}
       </div>
 

@@ -72,24 +72,20 @@ Hard rules :
 
 Convention `**emphase**` : entoure UN mot ou une courte expression par titre/body. Ce mot sera coloré en rouge sur le rendu PNG (ou tan sur la slide CTA pour la lisibilité). Choisis le mot pivot — verbe d'action, nom-clé, ou objection que la slide lève.
 
-6. POST le JSON sur `https://instagram-auto.vercel.app/api/intake` avec :
-   - Header `Content-Type: application/json`
-   - Header `x-intake-secret: <COPIE_LA_VALEUR_DEPUIS_ENV_LOCAL>` (jamais committer la vraie valeur)
-   - Body : le JSON tel quel
-7. Vérifie le status code de la réponse :
-   - 200 → l'app a accepté le draft, l'email de validation a été envoyé. Continue à l'étape 8.
-   - 400 → le draft n'est pas valide. Affiche les erreurs de validation, regénère, recommence.
-   - 401 → secret invalide. STOP, alerte l'utilisateur.
-   - autre → STOP, alerte l'utilisateur avec le détail.
-8. Si l'item venait de la queue, commit une nouvelle version de `content/queue.json` SANS cet item, avec un message de commit du type :
+6. Écris le draft JSON dans le fichier `drafts/<id>.json` du repo `JulesDups/instagram-auto` (où `<id>` est le `id` du JSON). Commit-le avec le message :
+   `feat(draft): generate <theme> carousel — <première phrase tronquée à 50 chars>`
+   IMPORTANT : ne JAMAIS appeler `https://instagram-auto.vercel.app/api/intake` directement. L'environnement de la Scheduled Task est derrière un egress proxy qui bloque ce domaine. La validation et la publication se font ensuite manuellement par Jules depuis le dashboard `/library` → preview → bouton "Publier sur Instagram".
+7. Si l'item venait de la queue, commit une nouvelle version de `content/queue.json` SANS cet item, avec le message :
    `chore(queue): consume "<angle court>" (<theme>)`
+8. Push les commits sur la branche `main` (ou sur une branche claude/* si la permission de push direct sur main n'est pas accordée — Jules mergera).
 9. Renvoie un résumé en sortie de task :
    - L'`id` du draft généré
    - Le `theme` choisi
    - L'`angle` traité
    - Un extrait des trois premiers titres de slides
-   - Si l'item venait de la queue ou du fallback rotation
-   - Le status HTTP de l'intake
+   - L'origine : `queue` ou `fallback-rotation`
+   - Le SHA et la branche du commit final
+   - Si tu as un doute sur la qualité ou la pertinence du sujet, ajoute `flag: needsReview`
 
 # Règles supplémentaires
 
