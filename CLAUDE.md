@@ -1,5 +1,32 @@
 @AGENTS.md
 
+<!-- ============================================================= -->
+<!-- 🔨 TEMPORARY — À SUPPRIMER APRÈS IMPLÉMENTATION                -->
+<!-- ============================================================= -->
+<!--
+  Prochaine session : implémenter la feature `ideas.md`.
+
+  Plan complet (non commité, local dans docs/ gitignored) :
+    docs/superpowers/plans/2026-04-10-ideas-md.md
+
+  Spec de référence :
+    docs/superpowers/specs/2026-04-10-ideas-md-design.md
+
+  Protocole à suivre :
+    1. Invoquer le skill `superpowers:executing-plans` (inline)
+       OU `superpowers:subagent-driven-development` (dispatch par task).
+    2. Le plan contient 6 tasks bite-size, self-review déjà fait.
+    3. Mode recommandé : inline execution (tâches très mécaniques,
+       contexte à recharger minimal, pas de jugement design).
+    4. Après la dernière task (push + deploy prod + smoke test),
+       ne PAS oublier : mettre à jour manuellement la Scheduled Task
+       sur claude.ai avec le nouveau prompt de prompts/scheduled-task.md.
+    5. Une fois implémenté, déployé et vérifié, SUPPRIMER ce bloc
+       HTML temporaire de CLAUDE.md et commit
+       `docs: remove temporary implementation reminder`.
+-->
+<!-- ============================================================= -->
+
 # instagram-auto
 
 Pipeline carousel Instagram. Claude.ai task → GitHub commit → Vercel webhook → Resend email validation → Instagram Graph API.
