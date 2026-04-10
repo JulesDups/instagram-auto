@@ -4,6 +4,7 @@ import { env } from "./env";
 import { loadDraft } from "./drafts";
 import { publishCarousel, type PublishCarouselResult } from "./instagram";
 import { buildFullCaption } from "./content";
+import { appendToManifest } from "./published";
 
 export interface PublishDraftResult extends PublishCarouselResult {
   draftId: string;
@@ -43,6 +44,23 @@ export async function publishDraft(draftId: string): Promise<PublishDraftResult>
     imageUrls,
     caption: buildFullCaption(draft),
   });
+
+  try {
+    await appendToManifest({
+      draftId,
+      mediaId: result.mediaId,
+      theme: draft.theme,
+      publishedAt: new Date().toISOString(),
+      blobSlideUrls: imageUrls,
+      captionPreview: draft.caption.slice(0, 200),
+    });
+  } catch (err) {
+    console.error(
+      `[publish] Failed to append draft ${draftId} to manifest:`,
+      err,
+    );
+    // Le post est déjà sur Instagram, on ne fait pas échouer le publish.
+  }
 
   return { ...result, draftId, imageUrls };
 }
