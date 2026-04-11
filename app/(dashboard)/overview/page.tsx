@@ -7,7 +7,18 @@ import { PillarBadge } from "@/components/pillar-badge";
 export const dynamic = "force-dynamic";
 
 export default async function OverviewPage() {
-  const stats = await getOverviewStats();
+  let stats;
+  try {
+    stats = await getOverviewStats();
+  } catch (e) {
+    const err = e as Error & { code?: string; meta?: unknown };
+    const msg = (err.message || String(e)).replace(/\s+/g, " ").slice(0, 400);
+    const code = err.code || "no-code";
+    const name = err.name || "Error";
+    const meta = err.meta ? JSON.stringify(err.meta).slice(0, 200) : "no-meta";
+    console.error(`[DBG-OVERVIEW] name=${name} code=${code} meta=${meta} msg=${msg}`);
+    throw e;
+  }
   const {
     queueByPillar,
     queueTotal,
