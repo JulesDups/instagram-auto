@@ -64,12 +64,11 @@ export async function publishDraft(
     caption: buildFullCaption(draft),
   });
 
-  const permalink = await getPermalink(
-    result.mediaId,
-    env().META_PAGE_ACCESS_TOKEN,
-  );
-
   try {
+    const permalink = await getPermalink(
+      result.mediaId,
+      env().META_PAGE_ACCESS_TOKEN,
+    );
     await appendToManifest({
       draftId,
       mediaId: result.mediaId,
