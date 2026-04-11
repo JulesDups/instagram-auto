@@ -1,15 +1,5 @@
 import Link from "next/link";
-import { loadQueue } from "@/lib/queue";
-import { loadManifest } from "@/lib/published";
-import { loadIdeas } from "@/lib/ideas";
-import {
-  countQueueByPillar,
-  distributionLast7Days,
-  formatRelativeFrench,
-  lastPublishedEntry,
-  publishedLastWeek,
-  publishedThisWeek,
-} from "@/lib/stats";
+import { getOverviewStats, formatRelativeFrench } from "@/lib/stats";
 import { StatCard } from "@/components/stat-card";
 import { DistributionBar } from "@/components/distribution-bar";
 import { PillarBadge } from "@/components/pillar-badge";
@@ -17,15 +7,17 @@ import { PillarBadge } from "@/components/pillar-badge";
 export const dynamic = "force-dynamic";
 
 export default async function OverviewPage() {
-  const queue = await loadQueue();
-  const { manifest, loadFailed } = await loadManifest();
-  const { entries: ideaEntries } = await loadIdeas();
-
-  const queueByPillar = countQueueByPillar(queue);
-  const thisWeek = publishedThisWeek(manifest);
-  const lastWeek = publishedLastWeek(manifest);
-  const lastEntry = lastPublishedEntry(manifest);
-  const distribution = distributionLast7Days(manifest);
+  const stats = await getOverviewStats();
+  const {
+    queueByPillar,
+    queueTotal,
+    ideasCount,
+    firstIdea,
+    publishedThisWeek: thisWeek,
+    publishedLastWeek: lastWeek,
+    lastPublished,
+    distribution7d,
+  } = stats;
 
   const delta = thisWeek - lastWeek;
   const deltaText =
@@ -44,41 +36,34 @@ export default async function OverviewPage() {
         <h1 className="mt-2 text-3xl font-bold text-[#1C343A]">Overview</h1>
       </header>
 
-      {loadFailed && (
-        <div className="mb-6 rounded-lg border border-[#BF2C23]/30 bg-[#BF2C23]/5 px-4 py-3 text-sm text-[#BF2C23]">
-          Manifest published.json non chargé — affichage dégradé. Les
-          historiques de publication peuvent être incomplets.
-        </div>
-      )}
-
       <div className="grid grid-cols-5 gap-4">
         <StatCard
           label="Idées en stock"
-          value={ideaEntries.length}
+          value={ideasCount}
           hint={
-            ideaEntries.length === 0
+            ideasCount === 0
               ? "Aucune — fallback queue"
-              : ideaEntries.length === 1
+              : ideasCount === 1
                 ? "Prochaine transformation"
-                : `${ideaEntries.length} à transformer`
+                : `${ideasCount} à transformer`
           }
         >
-          {ideaEntries[0] && (
+          {firstIdea && (
             <div className="line-clamp-3 text-xs text-[#1C343A]/60">
-              {ideaEntries[0].hardCta && (
+              {firstIdea.hardCta && (
                 <span className="mr-1 rounded-full bg-[#BF2C23]/10 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-[#BF2C23]">
                   CTA
                 </span>
               )}
-              {ideaEntries[0].text}
+              {firstIdea.text}
             </div>
           )}
         </StatCard>
 
         <StatCard
           label="Queue restante"
-          value={queue.items.length}
-          hint={`${queue.items.length} sujet${queue.items.length > 1 ? "s" : ""} en attente`}
+          value={queueTotal}
+          hint={`${queueTotal} sujet${queueTotal > 1 ? "s" : ""} en attente`}
         >
           <DistributionBar
             segments={queueByPillar.map((c) => ({
@@ -97,14 +82,14 @@ export default async function OverviewPage() {
         <StatCard
           label="Dernier post"
           value={
-            lastEntry ? formatRelativeFrench(lastEntry.publishedAt) : "Aucun"
+            lastPublished ? formatRelativeFrench(lastPublished.publishedAt) : "Aucun"
           }
           hint={
-            lastEntry ? (
+            lastPublished ? (
               <div className="flex items-center gap-2">
-                <PillarBadge theme={lastEntry.theme} />
+                <PillarBadge theme={lastPublished.theme} />
                 <Link
-                  href={`/preview/${lastEntry.draftId}`}
+                  href={`/preview/${lastPublished.draftId}`}
                   className="text-[#D4A374] underline"
                 >
                   voir
@@ -118,7 +103,7 @@ export default async function OverviewPage() {
 
         <StatCard label="Distribution 7 derniers jours" value="">
           <DistributionBar
-            segments={distribution.map((d) => ({
+            segments={distribution7d.map((d) => ({
               theme: d.theme,
               count: d.count,
               ratio: d.ratio,
