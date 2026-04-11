@@ -1,11 +1,12 @@
 import { PrismaClient } from "@prisma/client";
+import { PrismaPg } from "@prisma/adapter-pg";
 
 if (!process.env.TEST_DATABASE_URL) {
   throw new Error("TEST_DATABASE_URL is required for tests");
 }
 
 export const testDb = new PrismaClient({
-  datasources: { db: { url: process.env.TEST_DATABASE_URL } },
+  adapter: new PrismaPg(process.env.TEST_DATABASE_URL),
 });
 
 export async function resetDb(): Promise<void> {
