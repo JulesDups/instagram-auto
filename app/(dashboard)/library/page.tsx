@@ -1,6 +1,7 @@
 import { getDraftsWithStatus } from "@/lib/drafts";
 import { Tabs } from "@/components/tabs";
 import { DraftCard } from "@/components/draft-card";
+import { PillarBadge } from "@/components/pillar-badge";
 
 export const dynamic = "force-dynamic";
 
@@ -9,9 +10,15 @@ type Props = {
 };
 
 export default async function LibraryPage({ searchParams }: Props) {
-  const { tab } = await searchParams;
+  const { tab, pillar } = await searchParams;
   const currentTab =
     tab === "published" ? "published" : tab === "pending" ? "pending" : "all";
+  const currentPillar =
+    pillar === "tech-decryption" ||
+    pillar === "build-in-public" ||
+    pillar === "human-pro"
+      ? pillar
+      : null;
 
   const { items, manifestLoadFailed } = await getDraftsWithStatus();
   const allCount = items.length;
@@ -24,6 +31,10 @@ export default async function LibraryPage({ searchParams }: Props) {
       : currentTab === "pending"
         ? items.filter((i) => i.published === null)
         : items;
+
+  const filtered = currentPillar
+    ? visible.filter((i) => i.draft.theme === currentPillar)
+    : visible;
 
   return (
     <div>
@@ -51,7 +62,38 @@ export default async function LibraryPage({ searchParams }: Props) {
         basePath="/library"
       />
 
-      {visible.length === 0 ? (
+      <div className="mb-6 flex flex-wrap gap-2">
+        {(["tech-decryption", "build-in-public", "human-pro"] as const).map((theme) => {
+          const active = currentPillar === theme;
+          const params = new URLSearchParams();
+          if (currentTab !== "all") params.set("tab", currentTab);
+          if (!active) params.set("pillar", theme);
+          const href = `/library${params.toString() ? `?${params.toString()}` : ""}`;
+          return (
+            <a
+              key={theme}
+              href={href}
+              className={`inline-flex items-center rounded-full border px-3 py-1 text-xs font-medium transition ${
+                active
+                  ? "border-[#D4A374] bg-[#D4A374]/10 text-[#1C343A]"
+                  : "border-[#1C343A]/10 bg-white text-[#1C343A]/60 hover:border-[#D4A374]/40"
+              }`}
+            >
+              <PillarBadge theme={theme} />
+            </a>
+          );
+        })}
+        {currentPillar && (
+          <a
+            href={`/library${currentTab !== "all" ? `?tab=${currentTab}` : ""}`}
+            className="rounded-full border border-[#1C343A]/10 bg-white px-3 py-1 text-xs font-medium text-[#1C343A]/50 hover:text-[#1C343A]/80"
+          >
+            Tous les piliers ×
+          </a>
+        )}
+      </div>
+
+      {filtered.length === 0 ? (
         <p className="rounded-lg border border-[#1C343A]/10 bg-white px-4 py-8 text-center text-sm text-[#1C343A]/50">
           {currentTab === "published"
             ? "Aucun post publié pour l'instant."
@@ -61,7 +103,7 @@ export default async function LibraryPage({ searchParams }: Props) {
         </p>
       ) : (
         <div className="grid grid-cols-3 gap-6">
-          {visible.map((item) => (
+          {filtered.map((item) => (
             <DraftCard key={item.draft.id} item={item} />
           ))}
         </div>
