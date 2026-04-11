@@ -12,11 +12,16 @@ export default async function OverviewPage() {
     stats = await getOverviewStats();
   } catch (e) {
     const err = e as Error & { code?: string; meta?: unknown };
-    const msg = (err.message || String(e)).replace(/\s+/g, " ").slice(0, 400);
     const code = err.code || "no-code";
-    const name = err.name || "Error";
-    const meta = err.meta ? JSON.stringify(err.meta).slice(0, 200) : "no-meta";
-    console.error(`[DBG-OVERVIEW] name=${name} code=${code} meta=${meta} msg=${msg}`);
+    const msg = (err.message || String(e)).replace(/\s+/g, " ");
+    const meta = err.meta ? JSON.stringify(err.meta) : "";
+    console.error(`${code} NAME ${err.name || "?"}`);
+    console.error(`${code} META ${meta.slice(0, 80)}`);
+    console.error(`${code} M1 ${msg.slice(0, 80)}`);
+    console.error(`${code} M2 ${msg.slice(80, 160)}`);
+    console.error(`${code} M3 ${msg.slice(160, 240)}`);
+    console.error(`${code} M4 ${msg.slice(240, 320)}`);
+    console.error(`${code} M5 ${msg.slice(320, 400)}`);
     throw e;
   }
   const {
