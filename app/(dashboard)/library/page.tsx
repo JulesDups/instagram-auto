@@ -60,6 +60,7 @@ export default async function LibraryPage({ searchParams }: Props) {
         ]}
         currentTab={currentTab}
         basePath="/library"
+        extraQuery={currentPillar ? { pillar: currentPillar } : {}}
       />
 
       <div className="mb-6 flex flex-wrap gap-2">

@@ -10,14 +10,20 @@ interface Props {
   items: TabItem[];
   currentTab: string;
   basePath: string;
+  extraQuery?: Record<string, string>;
 }
 
-export function Tabs({ items, currentTab, basePath }: Props) {
+export function Tabs({ items, currentTab, basePath, extraQuery = {} }: Props) {
   return (
     <div className="mb-6 flex gap-1 border-b border-[#1C343A]/10">
       {items.map((item, i) => {
         const active = item.key === currentTab;
-        const href = i === 0 ? basePath : `${basePath}?tab=${item.key}`;
+        const href = (() => {
+          const params = new URLSearchParams(extraQuery);
+          if (i !== 0) params.set("tab", item.key);
+          const qs = params.toString();
+          return qs ? `${basePath}?${qs}` : basePath;
+        })();
         return (
           <Link
             key={item.key}
