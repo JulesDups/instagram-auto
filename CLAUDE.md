@@ -2,7 +2,7 @@
 
 # instagram-auto
 
-Pipeline carousel Instagram. Claude.ai task → GitHub commit → Vercel webhook → Resend email validation → Instagram Graph API.
+Pipeline carousel Instagram. Claude.ai task → GET /api/next-source → POST /api/intake → Neon Postgres → Resend email validation → Instagram Graph API.
 
 Compte cible : Creator account (handle dans `.env.local`). Cadence : 4-5 posts / semaine. CTA unique : "Travailler avec moi → bio".
 
@@ -29,28 +29,38 @@ Audience : pairs devs + juniors francophones. Positionnement : dev full-stack fr
 
 When the Scheduled Task runs, it selects the next draft source in this order :
 
-1. **`content/ideas.md`** — pop the first raw anecdote, transform into a full draft. Consumed in place.
-2. **`content/queue.json`** — if ideas.md is empty, pop the next queue item respecting pillar alternation.
+1. **`Idea` table** — pop the first raw anecdote, transform into a full draft. Marked consumed in DB.
+2. **`QueueItem` table** — if ideas table is empty, pop the next queue item respecting pillar alternation.
 3. **Fallback rotation** — if both are empty, pick the pillar most under-represented over the last 7 published drafts and generate an exploratory sujet.
 
 The dashboard `/overview` shows the current stock of ideas as a stat card.
 
+This priority order is enforced atomically server-side in `lib/repos/next-source.ts` via a Serializable transaction — not in the Claude.ai prompt.
+
 ## Flow
 
 ```
-Claude.ai Scheduled Task ──POST x-intake-secret──▶ /api/intake
-                                                         │ DraftSchema (Zod) → drafts/{id}.json → Resend email
+Claude.ai Scheduled Task ──GET x-intake-secret──▶ /api/next-source
+                                                         │ atomic pick (ideas > queue > fallback)
+                                                         │ source marked consumed in DB
+                                                         ▼
+                                              Claude.ai generates draft JSON
+                                                         │
+                                              ──POST x-intake-secret──▶ /api/intake
+                                                         │ DraftSchema (Zod) → Prisma Draft insert (status=pending)
                                                          ▼
                                               Email à EMAIL_TO (.env.local)
                                                          │ click signed link
                                ┌─── /api/publish ───┴─── /api/reject
                                │ verifyDraftToken (HMAC SHA256, 7d TTL)
+                               │                         │ → sets Draft status=rejected in DB
                                ▼
                        publishDraft(draftId)
                        1. fetch /api/render/{id}/{0..N} → PNG 1080×1080
                        2. put → Vercel Blob (public URL, IG needs internet-fetchable URLs)
                        3. publishCarousel → Graph API v21.0 (children → parent → publish)
-                       4. return media_id
+                       4. set Draft status=published, mediaId, publishedAt, permalink in DB
+                       5. return media_id
 ```
 
 ## Files (read these instead of grepping)
@@ -62,13 +72,16 @@ Claude.ai Scheduled Task ──POST x-intake-secret──▶ /api/intake
 | `lib/env.ts` | Zod-typed env, lazy cached, throws if invalid |
 | `lib/auth.ts` | Cookie HMAC SHA256 sign/verify + `comparePassword` (timingSafeEqual), COOKIE_NAME `dashboard-session`, TTL 30d |
 | `lib/content.ts` | `DraftSchema`, `SlideSchema`, `Theme` (3 pillars), `themeLabel`, `buildFullCaption`, `parseEmphasis`, `PILLAR_TARGET_DISTRIBUTION` |
-| `lib/drafts.ts` | fs I/O on `drafts/*.json` + `getDraftsWithStatus()` joining drafts with published manifest |
-| `lib/queue.ts` | fs I/O on `content/queue.json` (`loadQueue`, `saveQueue`, `QueueItemSchema`) |
-| `lib/ideas.ts` | Parser + loader for `content/ideas.md`, `parseIdeas()` (pure) + `loadIdeas()` (fs, returns empty on ENOENT) |
-| `lib/published.ts` | Vercel Blob manifest `meta/published.json`, `loadManifest` + `appendToManifest` |
+| `lib/db.ts` | Prisma client singleton (import `server-only`) |
+| `lib/theme.ts` | Enum mapping between URL-safe pillar slugs (`tech-decryption`) and Prisma enum values (`tech_decryption`) |
+| `lib/repos/drafts.ts` | `createDraft`, `getDraft`, `updateDraftContent`, `setDraftStatus`, `listDrafts`. Returns `PersistedDraft` (Draft + status/mediaId/publishedAt/permalink) |
+| `lib/repos/queue.ts` | CRUD on `QueueItem` |
+| `lib/repos/ideas.ts` | CRUD on `Idea` |
+| `lib/repos/published.ts` | Stats queries: `listPublished`, `getLastPublished`, `countPublishedThisWeek`, `getPillarDistribution` |
+| `lib/repos/next-source.ts` | Atomic `pickNextSource()` implementing priority ideas > queue > fallback (Serializable isolation + P2034 retry) |
 | `lib/stats.ts` | Overview helpers: weekly counts, last-7d distribution vs 50/30/20 target, `formatRelativeFrench` |
 | `lib/instagram.ts` | Graph API client + `waitForContainerReady` polling + `publishCarousel` |
-| `lib/publish.ts` | `publishDraft(draftId)` orchestration render→Blob→IG→manifest |
+| `lib/publish.ts` | `publishDraft(draftId)` orchestration render→Blob→IG→DB update |
 | `lib/email.ts` | Resend HTML draft review email with inline slide previews |
 | `lib/tokens.ts` | `createDraftToken` / `verifyDraftToken`, HMAC SHA256, base64url, 7d default TTL |
 
@@ -85,10 +98,11 @@ Claude.ai Scheduled Task ──POST x-intake-secret──▶ /api/intake
 | `app/login/page.tsx` | Login form (no auth) |
 | `app/api/auth/login/route.ts` | POST password → signed session cookie |
 | `app/api/auth/logout/route.ts` | POST → clear cookie |
-| `app/api/intake/route.ts` | POST, validates `x-intake-secret`, parses Draft, persists, sends email |
+| `app/api/next-source/route.ts` | GET, auth `x-intake-secret`, returns `{ kind: "idea"\|"queue"\|"fallback", ... }` and atomically marks source consumed in DB |
+| `app/api/intake/route.ts` | POST, validates `x-intake-secret`, parses Draft via Zod, persists via Prisma (status=pending), sends email |
 | `app/api/render/[draftId]/[index]/route.tsx` | `next/og` `ImageResponse`, runtime nodejs |
 | `app/api/publish/route.ts` | GET signed link, runtime nodejs, `maxDuration = 300` |
-| `app/api/reject/route.ts` | GET signed link, returns confirmation HTML |
+| `app/api/reject/route.ts` | GET signed link, sets Draft status=rejected in DB, returns confirmation HTML |
 
 ### App routes (behind auth, route group `(dashboard)`)
 
@@ -96,9 +110,12 @@ Claude.ai Scheduled Task ──POST x-intake-secret──▶ /api/intake
 |---|---|
 | `app/(dashboard)/layout.tsx` | Sidebar fixed 240px + max-w 1280px main, cream theme |
 | `app/(dashboard)/overview/page.tsx` | 4 stat cards: Queue restante / Publiés cette semaine / Dernier post / Distribution 7 derniers jours |
-| `app/(dashboard)/queue/page.tsx` | Editorial queue (up next + published history + theme counts) |
-| `app/(dashboard)/library/page.tsx` | Tabs `All` / `Published`, grid 3-col of draft cards |
+| `app/(dashboard)/ideas/page.tsx` | CRUD UI for `Idea` table (add/edit/delete raw anecdotes) |
+| `app/(dashboard)/queue/page.tsx` | Full CRUD on `QueueItem` (up next + published history + theme counts) |
+| `app/(dashboard)/library/page.tsx` | Tabs `All` / `Pending` / `Published` / `Rejected`, grid 3-col of draft cards |
 | `app/(dashboard)/preview/[draftId]/page.tsx` | Slides grid + publish status banner (mediaId + IG link) + caption |
+| `app/(dashboard)/preview/[draftId]/edit-form.tsx` | **Client.** Inline draft slide editor |
+| `app/(dashboard)/preview/[draftId]/actions.ts` | Server Actions for draft update + reject |
 
 ### Components (Server by default, Client marked with `"use client"`)
 
@@ -113,11 +130,7 @@ Claude.ai Scheduled Task ──POST x-intake-secret──▶ /api/intake
 
 ### Content
 
-| Path | Role |
-|---|---|
-| `content/queue.json` | Editorial queue (FIFO), seeded with 15 items across the 3 pillars |
-| `content/ideas.md` | Raw anecdote file, consumed by Scheduled Task in priority over queue.json. Format : markdown, entries separated by `---` on its own line, optional `[hard-cta]` prefix on first line of an entry |
-| `drafts/sample.json` | 7-slide test draft, theme `tech-decryption` |
+All content now lives in Neon Postgres. See `prisma/schema.prisma` for the schema. Fallback fixtures for tests in `test/**`.
 
 ## Brand palette
 
@@ -130,32 +143,16 @@ Claude.ai Scheduled Task ──POST x-intake-secret──▶ /api/intake
 
 Body text uses `rgba(28, 52, 58, 0.65–0.72)` on cream and `rgba(251, 250, 248, 0.75)` on dark.
 
-## Editorial queue (`content/queue.json`)
+## Editorial queue
 
-```json
-{
-  "items": [
-    {
-      "theme": "tech-decryption",
-      "angle": "Next.js Cache Components vs ISR : quand utiliser quoi en 2026",
-      "notes": "Démystifier 'use cache directive', cacheLife, cacheTag. Trade-offs réels.",
-      "cta": true
-    }
-  ]
-}
-```
-
-Each item has `theme` (one of the three pillars), `angle` (the post premise / hook to develop), optional `notes` (extra context for Claude.ai task to ground the content authentically), and optional `cta: true` to mark a "Travailler avec moi → bio" hard CTA post (default = soft CTA = open question in caption).
+Each `QueueItem` has `theme` (one of the three pillars), `angle` (the post premise / hook to develop), optional `notes` (extra context for Claude.ai task to ground the content authentically), and optional `cta: true` to mark a "Travailler avec moi → bio" hard CTA post (default = soft CTA = open question in caption). See `prisma/schema.prisma` for the full shape.
 
 Claude.ai task workflow:
-1. Read `content/queue.json` from the GitHub repo
-2. Pop the first item that respects the alternation rule (different pillar from the last published draft in `drafts/`)
-3. Generate the Draft JSON respecting all editorial rules above
-4. POST to `/api/intake` with the `x-intake-secret` header
-5. Commit the updated `content/queue.json` minus the consumed item
-6. If queue is empty: fall back to picking the most under-represented pillar over the last 7 drafts and generating an exploratory post
+1. `GET /api/next-source` with `x-intake-secret` header → atomic pick (ideas > queue > fallback); source marked consumed in DB
+2. Generate the Draft JSON respecting all editorial rules above
+3. `POST /api/intake` with the Draft JSON and `x-intake-secret` header
 
-`/queue` page on the deployed app shows the live state: pending items (FIFO order with index, theme badge, notes preview, CTA flag) and published history (sorted by `createdAt` desc).
+`/queue` page on the deployed app shows the live state: pending items (FIFO order with index, theme badge, notes preview, CTA flag) and full CRUD.
 
 ## Title/body emphasis convention
 
@@ -193,6 +190,8 @@ Use sparingly: 1 punchline per slide max, mirroring the user's site (`Vous crée
 - **Resend** : `EMAIL_FROM` must be on a verified domain.
 - **`.gitignore`** : `.env*` is ignored but `!.env*.example` is allowed through (added manually at scaffold).
 - **Vercel hooks** : auto-skill-loading fires aggressively on `app/**`, `next.config.*`, `.env.*`, `@vercel/blob` imports. Tolerate or use the suggested skills.
+- **Neon + Prisma** : `DATABASE_URL` is the pooled connection (for runtime), `DIRECT_URL` is the direct connection (for migrations). Both must be set in `.env.local` and Vercel env vars. Tests use `TEST_DATABASE_URL` (separate Neon branch) — see `vitest.config.ts` for file parallelism disabled to avoid shared-DB leakage.
+- **`server-only` + Vitest** : `lib/*` files use `import "server-only"` which Next.js resolves at build time. Vitest can't resolve it, so `vitest.config.ts` aliases it to `test/helpers/server-only-stub.ts` (no-op export).
 
 ## Commands
 
@@ -201,22 +200,21 @@ npm run dev          # turbopack, :3000
 npm run build        # turbopack production
 npm run lint         # eslint
 npx tsc --noEmit     # type-check only
+npm run test         # vitest against the test Neon branch (TEST_DATABASE_URL)
+npm run db:migrate -- --name <name>  # create + apply a Prisma migration
+npm run db:studio    # launch Prisma Studio
 ```
 
-## Local test (no external services needed)
+## Local test
 
-- `http://localhost:3000/` — drafts list
-- `http://localhost:3000/preview/sample` — HTML preview of all 7 slides
-- `http://localhost:3000/api/render/sample/{0..6}` — PNG 1080×1080 per slide
-- `curl -s http://localhost:3000/api/render/sample/0 -o /tmp/0.png` then Read tool on the PNG to visually verify
+- `npm run test` — full vitest suite against the Neon test branch (`TEST_DATABASE_URL`)
+- `npm run db:studio` — inspect / edit rows in Prisma Studio
+- Seed a draft via `POST /api/intake` (header `x-intake-secret`) or insert directly in Studio, then visit `/preview/<id>` and `/api/render/<id>/<index>` to verify rendering
 
 ## Next pending steps (in order)
 
-1. `vercel link` → `vercel integration add` (Blob) → `vercel env pull`
-2. `vercel deploy` (preview) → note the public URL → set as `PUBLIC_BASE_URL`
-3. `gh repo create instagram-auto --private --source=. --push`
-4. Configure Claude.ai Scheduled Task → POST to `/api/intake` with header `x-intake-secret`
-5. First end-to-end test with the `sample` draft
+1. Deploy preview → set `DATABASE_URL` / `DIRECT_URL` on Vercel → run `prisma migrate deploy` on prod branch
+2. Update Claude.ai Scheduled Task prompt to use `GET /api/next-source` before generating each draft
 
 ## Graph API reference (carousel publish flow)
 
@@ -237,9 +235,8 @@ POST /v21.0/{ig_user_id}/media_publish?creation_id={parent_id}&access_token=… 
 ## Architecture choices (don't re-litigate without good reason)
 
 - Content generation runs in **Claude.ai Scheduled Tasks**, not in this app — the app only receives via webhook. No `ANTHROPIC_API_KEY` here.
-- Drafts are stored as **JSON files in `drafts/`**, committed to the repo. No DB. Each Claude.ai task commit triggers a redeploy (or in pure webhook mode, skips redeploy and just calls `/api/intake`).
-- **GitHub repo as mailbox** (Pont 2 of 3 considered: webhook direct, GitHub, Notion).
+- Drafts and editorial state (queue, ideas, published history) live in **Neon Postgres via Prisma**. Accessed via `lib/repos/*`. No filesystem content, no Blob manifest.
 - **Email as garde-fou** with HMAC signed links for publish/reject. No Slack, no Telegram (user pref).
 - Slides rendered via **`next/og`** in inline-styled React (Satori). No Canva, no Bannerbear, no Playwright.
-- **Vercel Blob** for image hosting (Instagram needs public URLs, localhost can't be used in dev).
+- **Vercel Blob** for slide image hosting (Instagram needs public URLs, localhost can't be used in dev). No longer used for `meta/published.json` — published state is in Postgres.
 - **Single project, no monorepo** → `vercel link` (not `--repo`).

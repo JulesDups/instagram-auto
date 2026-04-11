@@ -1,0 +1,83 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum Theme {
+  tech_decryption
+  build_in_public
+  human_pro
+}
+
+enum SlideKind {
+  hook
+  content
+  cta
+}
+
+enum DraftStatus {
+  pending
+  published
+  rejected
+}
+
+model Idea {
+  id        String   @id @default(cuid())
+  text      String
+  hardCta   Boolean  @default(false)
+  consumed  Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([consumed, createdAt])
+}
+
+model QueueItem {
+  id        String   @id @default(cuid())
+  theme     Theme
+  angle     String
+  notes     String?
+  cta       Boolean  @default(false)
+  consumed  Boolean  @default(false)
+  position  Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([consumed, position])
+}
+
+model Draft {
+  id            String      @id
+  theme         Theme
+  caption       String
+  hashtags      String[]
+  status        DraftStatus @default(pending)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  publishedAt   DateTime?
+  mediaId       String?
+  slideBlobUrls String[]
+  permalink     String?
+  slides        Slide[]
+
+  @@index([status, createdAt])
+}
+
+model Slide {
+  id       String    @id @default(cuid())
+  draftId  String
+  draft    Draft     @relation(fields: [draftId], references: [id], onDelete: Cascade)
+  position Int
+  kind     SlideKind
+  title    String
+  body     String?
+  footer   String?
+
+  @@unique([draftId, position])
+}

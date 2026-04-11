@@ -1,4 +1,4 @@
-import { getDraftsWithStatus } from "@/lib/drafts";
+import { listDrafts } from "@/lib/repos/drafts";
 import { Tabs } from "@/components/tabs";
 import { DraftCard } from "@/components/draft-card";
 import { PillarBadge } from "@/components/pillar-badge";
@@ -9,10 +9,18 @@ type Props = {
   searchParams: Promise<{ tab?: string; pillar?: string }>;
 };
 
+type Tab = "all" | "pending" | "published" | "rejected";
+
 export default async function LibraryPage({ searchParams }: Props) {
   const { tab, pillar } = await searchParams;
-  const currentTab =
-    tab === "published" ? "published" : tab === "pending" ? "pending" : "all";
+  const currentTab: Tab =
+    tab === "published"
+      ? "published"
+      : tab === "pending"
+        ? "pending"
+        : tab === "rejected"
+          ? "rejected"
+          : "all";
   const currentPillar =
     pillar === "tech-decryption" ||
     pillar === "build-in-public" ||
@@ -20,21 +28,26 @@ export default async function LibraryPage({ searchParams }: Props) {
       ? pillar
       : null;
 
-  const { items, manifestLoadFailed } = await getDraftsWithStatus();
-  const allCount = items.length;
-  const publishedCount = items.filter((i) => i.published !== null).length;
-  const pendingCount = items.filter((i) => i.published === null).length;
+  // Fetch all drafts in parallel for accurate tab counts.
+  const [all, pending, published, rejected] = await Promise.all([
+    listDrafts({}),
+    listDrafts({ status: "pending" }),
+    listDrafts({ status: "published" }),
+    listDrafts({ status: "rejected" }),
+  ]);
 
-  const visible =
+  const source =
     currentTab === "published"
-      ? items.filter((i) => i.published !== null)
+      ? published
       : currentTab === "pending"
-        ? items.filter((i) => i.published === null)
-        : items;
+        ? pending
+        : currentTab === "rejected"
+          ? rejected
+          : all;
 
   const filtered = currentPillar
-    ? visible.filter((i) => i.draft.theme === currentPillar)
-    : visible;
+    ? source.filter((d) => d.theme === currentPillar)
+    : source;
 
   return (
     <div>
@@ -45,18 +58,12 @@ export default async function LibraryPage({ searchParams }: Props) {
         <h1 className="mt-2 text-3xl font-bold text-[#1C343A]">Library</h1>
       </header>
 
-      {manifestLoadFailed && (
-        <div className="mb-6 rounded-lg border border-[#BF2C23]/30 bg-[#BF2C23]/5 px-4 py-3 text-sm text-[#BF2C23]">
-          Manifest non chargé — les états &quot;publié&quot; peuvent être
-          incomplets.
-        </div>
-      )}
-
       <Tabs
         items={[
-          { key: "all", label: "Tous", count: allCount },
-          { key: "pending", label: "À valider", count: pendingCount },
-          { key: "published", label: "Publiés", count: publishedCount },
+          { key: "all", label: "Tous", count: all.length },
+          { key: "pending", label: "À valider", count: pending.length },
+          { key: "published", label: "Publiés", count: published.length },
+          { key: "rejected", label: "Rejetés", count: rejected.length },
         ]}
         currentTab={currentTab}
         basePath="/library"
@@ -99,13 +106,15 @@ export default async function LibraryPage({ searchParams }: Props) {
           {currentTab === "published"
             ? "Aucun post publié pour l'instant."
             : currentTab === "pending"
-              ? "Tous les drafts ont été publiés."
-              : "Aucun draft pour le moment."}
+              ? "Aucun draft en attente."
+              : currentTab === "rejected"
+                ? "Aucun draft rejeté."
+                : "Aucun draft pour le moment."}
         </p>
       ) : (
         <div className="grid grid-cols-3 gap-6">
-          {filtered.map((item) => (
-            <DraftCard key={item.draft.id} item={item} />
+          {filtered.map((draft) => (
+            <DraftCard key={draft.id} draft={draft} />
           ))}
         </div>
       )}

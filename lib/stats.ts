@@ -1,8 +1,10 @@
 import "server-only";
 import type { Theme } from "./content";
-import type { PublishedManifest } from "./published";
-import type { QueueFile } from "./queue";
 import { PILLAR_TARGET_DISTRIBUTION } from "./content";
+import { listQueue } from "./repos/queue";
+import { listIdeas } from "./repos/ideas";
+import { listDrafts } from "./repos/drafts";
+import { countPublishedThisWeek } from "./repos/published";
 
 const ONE_WEEK_MS = 7 * 24 * 60 * 60 * 1000;
 
@@ -14,57 +16,80 @@ export interface PillarCount {
 export interface PillarRatio {
   theme: Theme;
   count: number;
-  ratio: number; // 0..1
-  target: number; // 0..1
+  ratio: number;
+  target: number;
   withinTarget: boolean;
 }
 
-export function countQueueByPillar(queue: QueueFile): PillarCount[] {
+export interface OverviewStats {
+  queueByPillar: PillarCount[];
+  queueTotal: number;
+  ideasCount: number;
+  firstIdea: { text: string; hardCta: boolean } | null;
+  publishedThisWeek: number;
+  publishedLastWeek: number;
+  lastPublished: {
+    draftId: string;
+    theme: Theme;
+    publishedAt: string;
+  } | null;
+  distribution7d: PillarRatio[];
+}
+
+export async function getOverviewStats(): Promise<OverviewStats> {
+  const [queue, ideas, weekCount, allPublished] = await Promise.all([
+    listQueue({ consumed: false }),
+    listIdeas({ consumed: false }),
+    countPublishedThisWeek(),
+    listDrafts({ status: "published" }),
+  ]);
+
   const themes: Theme[] = ["tech-decryption", "build-in-public", "human-pro"];
-  return themes.map((theme) => ({
+
+  // Queue per-pillar counts
+  const queueByPillar: PillarCount[] = themes.map((theme) => ({
     theme,
-    count: queue.items.filter((item) => item.theme === theme).length,
+    count: queue.filter((q) => q.theme === theme).length,
   }));
-}
 
-export function publishedThisWeek(manifest: PublishedManifest): number {
   const now = Date.now();
-  return manifest.entries.filter(
-    (entry) => now - new Date(entry.publishedAt).getTime() < ONE_WEEK_MS,
-  ).length;
-}
 
-export function publishedLastWeek(manifest: PublishedManifest): number {
-  const now = Date.now();
-  return manifest.entries.filter((entry) => {
-    const t = new Date(entry.publishedAt).getTime();
+  // Published last week (8-14 days ago)
+  const lastWeekCount = allPublished.filter((p) => {
+    if (!p.publishedAt) return false;
+    const t = new Date(p.publishedAt).getTime();
     return now - t >= ONE_WEEK_MS && now - t < 2 * ONE_WEEK_MS;
   }).length;
-}
 
-export function lastPublishedEntry(manifest: PublishedManifest) {
-  if (manifest.entries.length === 0) return null;
-  return [...manifest.entries].sort((a, b) =>
-    b.publishedAt.localeCompare(a.publishedAt),
-  )[0];
-}
+  // Last published entry (allPublished is already sorted by createdAt desc)
+  const lastPub = allPublished.find((p) => p.publishedAt != null) ?? null;
 
-export function distributionLast7Days(
-  manifest: PublishedManifest,
-): PillarRatio[] {
-  const now = Date.now();
-  const recent = manifest.entries.filter(
-    (entry) => now - new Date(entry.publishedAt).getTime() < ONE_WEEK_MS,
+  // 7-day distribution
+  const recentPub = allPublished.filter(
+    (p) => p.publishedAt && now - new Date(p.publishedAt).getTime() < ONE_WEEK_MS,
   );
-  const total = recent.length;
-  const themes: Theme[] = ["tech-decryption", "build-in-public", "human-pro"];
-  return themes.map((theme) => {
-    const count = recent.filter((e) => e.theme === theme).length;
-    const ratio = total === 0 ? 0 : count / total;
+  const totalRecent = recentPub.length;
+  const distribution7d: PillarRatio[] = themes.map((theme) => {
+    const count = recentPub.filter((p) => p.theme === theme).length;
+    const ratio = totalRecent === 0 ? 0 : count / totalRecent;
     const target = PILLAR_TARGET_DISTRIBUTION[theme];
-    const withinTarget = total === 0 || Math.abs(ratio - target) <= 0.1;
+    const withinTarget = totalRecent === 0 || Math.abs(ratio - target) <= 0.1;
     return { theme, count, ratio, target, withinTarget };
   });
+
+  return {
+    queueByPillar,
+    queueTotal: queue.length,
+    ideasCount: ideas.length,
+    firstIdea: ideas[0] ? { text: ideas[0].text, hardCta: ideas[0].hardCta } : null,
+    publishedThisWeek: weekCount,
+    publishedLastWeek: lastWeekCount,
+    lastPublished:
+      lastPub && lastPub.publishedAt
+        ? { draftId: lastPub.id, theme: lastPub.theme, publishedAt: lastPub.publishedAt }
+        : null,
+    distribution7d,
+  };
 }
 
 export function formatRelativeFrench(iso: string): string {
