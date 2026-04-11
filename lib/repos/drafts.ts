@@ -1,3 +1,4 @@
+import "server-only";
 import { Prisma, PrismaClient, DraftStatus } from "@prisma/client";
 import { db as defaultDb } from "@/lib/db";
 import type { Draft, Slide } from "@/lib/content";
