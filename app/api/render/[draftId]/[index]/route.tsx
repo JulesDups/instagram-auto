@@ -1,5 +1,5 @@
 import { ImageResponse } from "next/og";
-import { loadDraft } from "@/lib/drafts";
+import { getDraft } from "@/lib/repos/drafts";
 import { HookSlide } from "@/templates/slide-hook";
 import { ContentSlide } from "@/templates/slide-content";
 import { CtaSlide } from "@/templates/slide-cta";
@@ -15,14 +15,9 @@ export async function GET(
   const { draftId, index: indexStr } = await ctx.params;
   const index = Number.parseInt(indexStr, 10);
 
-  let draft;
-  try {
-    draft = await loadDraft(draftId);
-  } catch (err) {
-    return new Response(
-      `Draft not found: ${draftId}\n${err instanceof Error ? err.message : ""}`,
-      { status: 404 },
-    );
+  const draft = await getDraft(draftId);
+  if (!draft) {
+    return new Response(`Draft not found: ${draftId}`, { status: 404 });
   }
 
   if (Number.isNaN(index) || index < 0 || index >= draft.slides.length) {
