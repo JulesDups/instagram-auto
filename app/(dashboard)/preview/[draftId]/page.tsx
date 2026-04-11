@@ -19,12 +19,17 @@ export default async function PreviewPage({
     notFound();
   }
 
-  const { manifest } = await loadManifest();
+  const { manifest, loadFailed: manifestLoadFailed } = await loadManifest();
   const publishedEntry =
     manifest.entries.find((e) => e.draftId === draft.id) ?? null;
 
   return (
     <div>
+      {manifestLoadFailed && (
+        <div className="mb-6 rounded-lg border border-[#BF2C23]/30 bg-[#BF2C23]/5 px-4 py-3 text-sm text-[#BF2C23]">
+          Manifest non chargé — l&apos;état de publication est indéterminé. Publication désactivée.
+        </div>
+      )}
       <div className="mb-6">
         <PillarBadge theme={draft.theme} />
         <h1 className="mt-3 text-3xl font-bold text-[#1C343A]">
@@ -69,17 +74,27 @@ export default async function PreviewPage({
               Voir sur Instagram
             </a>
           ) : (
-            <form
-              action={`/api/dashboard-publish/${draft.id}`}
-              method="POST"
-            >
+            manifestLoadFailed ? (
               <button
-                type="submit"
-                className="rounded-lg bg-[#1C343A] px-4 py-2 text-sm font-semibold text-[#FBFAF8] transition hover:bg-[#1C343A]/90"
+                type="button"
+                disabled
+                className="cursor-not-allowed rounded-lg bg-[#1C343A]/30 px-4 py-2 text-sm font-semibold text-[#FBFAF8]"
               >
-                Publier sur Instagram
+                État indéterminé
               </button>
-            </form>
+            ) : (
+              <form
+                action={`/api/dashboard-publish/${draft.id}`}
+                method="POST"
+              >
+                <button
+                  type="submit"
+                  className="rounded-lg bg-[#1C343A] px-4 py-2 text-sm font-semibold text-[#FBFAF8] transition hover:bg-[#1C343A]/90"
+                >
+                  Publier sur Instagram
+                </button>
+              </form>
+            )
           )}
         </div>
         {publishedEntry && (
