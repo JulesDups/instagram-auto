@@ -7,6 +7,10 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: import.meta.dirname,
   },
+  // pg and @prisma/adapter-pg use native Node.js modules (net, tls, crypto)
+  // that cannot be bundled by Turbopack/webpack. Declare them external so
+  // Next.js loads them from node_modules at runtime instead.
+  serverExternalPackages: ["pg", "@prisma/adapter-pg"],
 };
 
 export default nextConfig;
