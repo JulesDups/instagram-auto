@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { loadQueue } from "@/lib/queue";
 import { loadManifest } from "@/lib/published";
+import { loadIdeas } from "@/lib/ideas";
 import {
   countQueueByPillar,
   distributionLast7Days,
@@ -18,6 +19,7 @@ export const dynamic = "force-dynamic";
 export default async function OverviewPage() {
   const queue = await loadQueue();
   const { manifest, loadFailed } = await loadManifest();
+  const { entries: ideaEntries } = await loadIdeas();
 
   const queueByPillar = countQueueByPillar(queue);
   const thisWeek = publishedThisWeek(manifest);
@@ -49,7 +51,30 @@ export default async function OverviewPage() {
         </div>
       )}
 
-      <div className="grid grid-cols-4 gap-4">
+      <div className="grid grid-cols-5 gap-4">
+        <StatCard
+          label="Idées en stock"
+          value={ideaEntries.length}
+          hint={
+            ideaEntries.length === 0
+              ? "Aucune — fallback queue"
+              : ideaEntries.length === 1
+                ? "Prochaine transformation"
+                : `${ideaEntries.length} à transformer`
+          }
+        >
+          {ideaEntries[0] && (
+            <div className="line-clamp-3 text-xs text-[#1C343A]/60">
+              {ideaEntries[0].hardCta && (
+                <span className="mr-1 rounded-full bg-[#BF2C23]/10 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-[#BF2C23]">
+                  CTA
+                </span>
+              )}
+              {ideaEntries[0].text}
+            </div>
+          )}
+        </StatCard>
+
         <StatCard
           label="Queue restante"
           value={queue.items.length}
