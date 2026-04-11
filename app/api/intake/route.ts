@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { env } from "@/lib/env";
 import { DraftSchema } from "@/lib/content";
-import { saveDraft } from "@/lib/drafts";
+import { createDraft } from "@/lib/repos/drafts";
 import { sendDraftReviewEmail } from "@/lib/email";
 
 export const runtime = "nodejs";
@@ -28,7 +28,14 @@ export async function POST(req: Request) {
   }
 
   const draft = parsed.data;
-  await saveDraft(draft);
+
+  try {
+    await createDraft(draft);
+  } catch (err) {
+    console.error("[intake] createDraft failed:", err);
+    return NextResponse.json({ error: "persistence failed" }, { status: 500 });
+  }
+
   await sendDraftReviewEmail(draft);
 
   return NextResponse.json({
