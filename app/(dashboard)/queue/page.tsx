@@ -1,6 +1,8 @@
 import { loadQueue } from "@/lib/queue";
 import { getDraftsWithStatus } from "@/lib/drafts";
+import type { Draft } from "@/lib/content";
 import { stripEmphasis } from "@/lib/content";
+import type { PublishedEntry } from "@/lib/published";
 import { PillarBadge } from "@/components/pillar-badge";
 
 export const dynamic = "force-dynamic";
@@ -9,7 +11,10 @@ export default async function QueuePage() {
   const queue = await loadQueue();
   const { items: draftItems, manifestLoadFailed } = await getDraftsWithStatus();
 
-  const publishedItems = draftItems.filter((i) => i.published !== null);
+  const publishedItems = draftItems.filter(
+    (i): i is { draft: Draft; published: PublishedEntry } =>
+      i.published !== null,
+  );
   const unpublishedCount = draftItems.filter((i) => i.published === null).length;
 
   const counts: Record<string, number> = {};
@@ -138,12 +143,12 @@ export default async function QueuePage() {
                     {stripEmphasis(d.slides[0]?.title ?? d.id)}
                   </div>
                   <div className="mt-1 text-xs text-[#1C343A]/50">
-                    {new Date(p!.publishedAt).toLocaleString("fr-FR", {
+                    {new Date(p.publishedAt).toLocaleString("fr-FR", {
                       dateStyle: "long",
                       timeStyle: "short",
                     })}{" "}
                     · {d.slides.length} slides · Media ID :{" "}
-                    <code className="font-mono">{p!.mediaId}</code>
+                    <code className="font-mono">{p.mediaId}</code>
                   </div>
                 </a>
               </li>
