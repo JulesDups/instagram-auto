@@ -2,12 +2,6 @@
   "items": [
     {
       "theme": "tech-decryption",
-      "angle": "Next.js Cache Components vs ISR : quand utiliser quoi en 2026",
-      "notes": "Démystifier le 'use cache directive', cacheLife, cacheTag. Trade-offs réels vs revalidate. Mes choix sur instagram-auto.",
-      "cta": true
-    },
-    {
-      "theme": "tech-decryption",
       "angle": "Prisma vs Drizzle en 2026 : ce qui a vraiment changé",
       "notes": "Migration tooling, types inference, Edge compat. Mon retour après 3 ans Prisma + 6 mois Drizzle sur side projects."
     },
