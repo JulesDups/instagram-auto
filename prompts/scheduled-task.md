@@ -40,6 +40,34 @@ Hard rules :
 
 # Workflow à exécuter chaque run
 
+**0. Lecture de content/ideas.md (priorité sur la queue)**
+
+Lis d'abord le fichier `content/ideas.md` du repo `JulesDups/instagram-auto` branche `main`.
+
+- Parse-le en séparant sur les lignes contenant exactement `---`.
+- Ignore tout ce qui est au-dessus du premier `---` (c'est le header explicatif, jamais consommé).
+- Chaque chunk suivant, après trim, est une entrée. Ignore les chunks vides.
+- Si la première ligne (après trim) d'une entrée commence par `[hard-cta]`, retire ce préfixe et note `hardCta = true`. Sinon `hardCta = false`.
+
+Si au moins une entrée non vide existe, choisis la PREMIÈRE. Détermine le pilier qui colle le mieux à son contenu (tech-decryption / build-in-public / human-pro) en t'appuyant sur les thèmes dominants : outils/frameworks → tech-decryption ; projet instagram-auto ou side projects → build-in-public ; anecdotes freelance/setup/conseils → human-pro.
+
+Génère un draft complet à partir de l'anecdote en respectant TOUTES les règles éditoriales et le schéma JSON ci-dessous. Si `hardCta` est vrai, la slide CTA finale et la caption doivent se terminer par "Travailler avec moi → bio" ; sinon, termine par une question ouverte en commentaire.
+
+Après génération, passe DIRECTEMENT à l'étape 6 (écriture du draft dans `drafts/<id>.json`).
+
+Après le commit du draft à l'étape 6, réécris `content/ideas.md` SANS l'entrée consommée :
+- Garde le header intact (tout ce qui est au-dessus du premier `---`).
+- Ré-assemble les entrées restantes, chacune séparée par `\n\n---\n\n`.
+- Préserve la trailing newline finale.
+- Si après retrait il ne reste plus d'entrées, le fichier se termine par `---\n` seul sous le header (prêt à accepter de nouvelles idées).
+- Commit avec le message : `chore(ideas): consume "<première phrase tronquée à 50 chars>"`.
+
+Dans le résumé final (étape 9), marque `source: ideas` et inclus `hardCta: <bool>`.
+
+SKIP les étapes 1-5 et 7. Va directement à l'étape 6, puis 8, puis 9.
+
+---
+
 1. Lis le fichier `content/queue.json` du repo GitHub `JulesDups/instagram-auto` (branche `main`).
 2. Lis tous les fichiers `drafts/*.json` du même repo. Trie-les par `createdAt` décroissant. Note le `theme` du plus récent — c'est le `lastTheme`.
 3. Sélectionne le PROCHAIN item de la queue (`items[0]`) qui a un `theme` différent de `lastTheme`. Si le premier item a le même thème, prends le second. Si toute la queue a le même thème, prends le premier quand même.
@@ -90,7 +118,7 @@ Convention `**emphase**` : entoure UN mot ou une courte expression par titre/bod
    - Le `theme` choisi
    - L'`angle` traité
    - Un extrait des trois premiers titres de slides
-   - L'origine : `queue` ou `fallback-rotation`
+   - L'origine : `ideas`, `queue` ou `fallback-rotation`
    - Le SHA et la branche du commit final
    - Si tu as un doute sur la qualité ou la pertinence du sujet, ajoute `flag: needsReview`
 
