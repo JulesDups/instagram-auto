@@ -1,12 +1,12 @@
 import { PrismaClient } from "@prisma/client";
-import { PrismaPg } from "@prisma/adapter-pg";
+import { PrismaNeon } from "@prisma/adapter-neon";
 
 if (!process.env.TEST_DATABASE_URL) {
   throw new Error("TEST_DATABASE_URL is required for tests");
 }
 
 export const testDb = new PrismaClient({
-  adapter: new PrismaPg(process.env.TEST_DATABASE_URL),
+  adapter: new PrismaNeon({ connectionString: process.env.TEST_DATABASE_URL }),
 });
 
 export async function resetDb(): Promise<void> {
