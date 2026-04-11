@@ -1,26 +1,16 @@
 import { loadQueue } from "@/lib/queue";
-import { listDraftIds, loadDraft } from "@/lib/drafts";
-import { stripEmphasis, type Draft } from "@/lib/content";
+import { getDraftsWithStatus } from "@/lib/drafts";
+import { stripEmphasis } from "@/lib/content";
 import { PillarBadge } from "@/components/pillar-badge";
 
 export const dynamic = "force-dynamic";
 
 export default async function QueuePage() {
   const queue = await loadQueue();
-  const ids = await listDraftIds();
-  const drafts = (
-    await Promise.all(
-      ids.map(async (id) => {
-        try {
-          return await loadDraft(id);
-        } catch {
-          return null;
-        }
-      }),
-    )
-  )
-    .filter((d): d is Draft => d !== null)
-    .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  const { items: draftItems, manifestLoadFailed } = await getDraftsWithStatus();
+
+  const publishedItems = draftItems.filter((i) => i.published !== null);
+  const unpublishedCount = draftItems.filter((i) => i.published === null).length;
 
   const counts: Record<string, number> = {};
   for (const item of queue.items) {
@@ -38,9 +28,10 @@ export default async function QueuePage() {
         </h1>
         <p className="mt-3 text-[#1C343A]/60">
           {queue.items.length} sujet
-          {queue.items.length === 1 ? "" : "s"} en attente · {drafts.length}{" "}
-          draft{drafts.length === 1 ? "" : "s"} publié
-          {drafts.length === 1 ? "" : "s"}
+          {queue.items.length === 1 ? "" : "s"} en attente ·{" "}
+          {publishedItems.length} publié
+          {publishedItems.length === 1 ? "" : "s"} ·{" "}
+          {unpublishedCount} en attente de validation
         </p>
         {queue.items.length > 0 && (
           <div className="mt-4 flex flex-wrap gap-2">
@@ -59,7 +50,24 @@ export default async function QueuePage() {
             )}
           </div>
         )}
+        <p className="mt-3 text-xs text-[#1C343A]/40">
+          Queue gérée par commit —{" "}
+          <a
+            href="https://github.com/JulesDups/instagram-auto/blob/main/content/queue.json"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[#D4A374] underline"
+          >
+            éditer content/queue.json →
+          </a>
+        </p>
       </header>
+
+      {manifestLoadFailed && (
+        <div className="mb-6 rounded-lg border border-[#BF2C23]/30 bg-[#BF2C23]/5 px-4 py-3 text-sm text-[#BF2C23]">
+          Manifest non chargé — les états publiés peuvent être incomplets.
+        </div>
+      )}
 
       <section className="mb-16">
         <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-[#1C343A]/50">
@@ -106,31 +114,36 @@ export default async function QueuePage() {
 
       <section>
         <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-[#1C343A]/50">
-          Published
+          Publiés
         </h2>
-        {drafts.length === 0 ? (
+        {publishedItems.length === 0 ? (
           <p className="rounded-lg border border-[#1C343A]/10 bg-white px-4 py-3 text-[#1C343A]/50">
-            Aucun draft pour l&apos;instant.
+            Aucun post publié pour l&apos;instant.
           </p>
         ) : (
           <ul className="space-y-3">
-            {drafts.map((d) => (
+            {publishedItems.map(({ draft: d, published: p }) => (
               <li
                 key={d.id}
                 className="rounded-lg border border-[#1C343A]/10 bg-white transition hover:border-[#D4A374]/60"
               >
                 <a href={`/preview/${d.id}`} className="block p-4">
-                  <PillarBadge theme={d.theme} />
+                  <div className="flex items-center justify-between">
+                    <PillarBadge theme={d.theme} />
+                    <span className="text-[10px] font-semibold uppercase tracking-wider text-emerald-600">
+                      Publié
+                    </span>
+                  </div>
                   <div className="mt-2 font-medium text-[#1C343A]">
                     {stripEmphasis(d.slides[0]?.title ?? d.id)}
                   </div>
-                  <div className="mt-2 text-xs text-[#1C343A]/50">
-                    {d.id} ·{" "}
-                    {new Date(d.createdAt).toLocaleString("fr-FR", {
+                  <div className="mt-1 text-xs text-[#1C343A]/50">
+                    {new Date(p!.publishedAt).toLocaleString("fr-FR", {
                       dateStyle: "long",
                       timeStyle: "short",
                     })}{" "}
-                    · {d.slides.length} slides
+                    · {d.slides.length} slides · Media ID :{" "}
+                    <code className="font-mono">{p!.mediaId}</code>
                   </div>
                 </a>
               </li>
