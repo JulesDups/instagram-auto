@@ -5,21 +5,25 @@ import { DraftCard } from "@/components/draft-card";
 export const dynamic = "force-dynamic";
 
 type Props = {
-  searchParams: Promise<{ tab?: string }>;
+  searchParams: Promise<{ tab?: string; pillar?: string }>;
 };
 
 export default async function LibraryPage({ searchParams }: Props) {
   const { tab } = await searchParams;
-  const currentTab = tab === "published" ? "published" : "all";
+  const currentTab =
+    tab === "published" ? "published" : tab === "pending" ? "pending" : "all";
 
   const { items, manifestLoadFailed } = await getDraftsWithStatus();
   const allCount = items.length;
   const publishedCount = items.filter((i) => i.published !== null).length;
+  const pendingCount = items.filter((i) => i.published === null).length;
 
   const visible =
     currentTab === "published"
       ? items.filter((i) => i.published !== null)
-      : items;
+      : currentTab === "pending"
+        ? items.filter((i) => i.published === null)
+        : items;
 
   return (
     <div>
@@ -39,8 +43,9 @@ export default async function LibraryPage({ searchParams }: Props) {
 
       <Tabs
         items={[
-          { key: "all", label: "All drafts", count: allCount },
-          { key: "published", label: "Published", count: publishedCount },
+          { key: "all", label: "Tous", count: allCount },
+          { key: "pending", label: "À valider", count: pendingCount },
+          { key: "published", label: "Publiés", count: publishedCount },
         ]}
         currentTab={currentTab}
         basePath="/library"
@@ -50,7 +55,9 @@ export default async function LibraryPage({ searchParams }: Props) {
         <p className="rounded-lg border border-[#1C343A]/10 bg-white px-4 py-8 text-center text-sm text-[#1C343A]/50">
           {currentTab === "published"
             ? "Aucun post publié pour l'instant."
-            : "Aucun draft pour le moment."}
+            : currentTab === "pending"
+              ? "Tous les drafts ont été publiés."
+              : "Aucun draft pour le moment."}
         </p>
       ) : (
         <div className="grid grid-cols-3 gap-6">
