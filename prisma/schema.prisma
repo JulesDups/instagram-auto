@@ -63,6 +63,7 @@ model Draft {
   publishedAt   DateTime?
   mediaId       String?
   slideBlobUrls String[]
+  permalink     String?
   slides        Slide[]
 
   @@index([status, createdAt])

@@ -6,6 +6,19 @@ import { themeToDb, themeFromDb } from "@/lib/theme";
 
 type DB = PrismaClient | Prisma.TransactionClient;
 
+/**
+ * PersistedDraft extends the pure intake-shaped Draft with DB metadata:
+ * status, mediaId, publishedAt, permalink. Used as the return type for
+ * getDraft and listDrafts so callers (publish.ts, dashboard pages) can
+ * access publish state without a separate query.
+ */
+export interface PersistedDraft extends Draft {
+  status: "pending" | "published" | "rejected";
+  mediaId: string | null;
+  publishedAt: string | null;
+  permalink: string | null;
+}
+
 export async function createDraft(draft: Draft, dbArg: DB = defaultDb): Promise<void> {
   await dbArg.draft.create({
     data: {
@@ -27,7 +40,10 @@ export async function createDraft(draft: Draft, dbArg: DB = defaultDb): Promise<
   });
 }
 
-export async function getDraft(id: string, dbArg: DB = defaultDb): Promise<Draft | null> {
+export async function getDraft(
+  id: string,
+  dbArg: DB = defaultDb,
+): Promise<PersistedDraft | null> {
   const row = await dbArg.draft.findUnique({
     where: { id },
     include: { slides: { orderBy: { position: "asc" } } },
@@ -45,6 +61,14 @@ export async function getDraft(id: string, dbArg: DB = defaultDb): Promise<Draft
       body: s.body ?? undefined,
       footer: s.footer ?? undefined,
     })),
+    status: row.status === DraftStatus.pending
+      ? "pending"
+      : row.status === DraftStatus.published
+        ? "published"
+        : "rejected",
+    mediaId: row.mediaId ?? null,
+    publishedAt: row.publishedAt ? row.publishedAt.toISOString() : null,
+    permalink: row.permalink ?? null,
   };
 }
 
@@ -90,6 +114,7 @@ export interface StatusUpdate {
   status: "pending" | "published" | "rejected";
   mediaId?: string;
   slideBlobUrls?: string[];
+  permalink?: string;
 }
 
 export async function setDraftStatus(
@@ -104,6 +129,7 @@ export async function setDraftStatus(
       mediaId: update.mediaId ?? null,
       slideBlobUrls: update.slideBlobUrls ?? [],
       publishedAt: update.status === "published" ? new Date() : null,
+      permalink: update.permalink ?? null,
     },
   });
 }
@@ -115,7 +141,7 @@ export interface ListFilter {
 export async function listDrafts(
   filter: ListFilter = {},
   dbArg: DB = defaultDb,
-): Promise<Draft[]> {
+): Promise<PersistedDraft[]> {
   const rows = await dbArg.draft.findMany({
     where: filter.status ? { status: DraftStatus[filter.status] } : undefined,
     orderBy: { createdAt: "desc" },
@@ -133,5 +159,13 @@ export async function listDrafts(
       body: s.body ?? undefined,
       footer: s.footer ?? undefined,
     })),
+    status: row.status === DraftStatus.pending
+      ? "pending"
+      : row.status === DraftStatus.published
+        ? "published"
+        : "rejected",
+    mediaId: row.mediaId ?? null,
+    publishedAt: row.publishedAt ? row.publishedAt.toISOString() : null,
+    permalink: row.permalink ?? null,
   }));
 }

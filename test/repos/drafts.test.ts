@@ -9,6 +9,7 @@ import {
   listDrafts,
 } from "@/lib/repos/drafts";
 import type { Draft } from "@/lib/content";
+import type { PersistedDraft } from "@/lib/repos/drafts";
 
 const sample: Draft = {
   id: "test-draft-1",
@@ -78,6 +79,51 @@ describe("drafts repo", () => {
     expect(row?.status).toBe(DraftStatus.published);
     expect(row?.mediaId).toBe("ig_123");
     expect(row?.publishedAt).not.toBeNull();
+  });
+
+  test("setDraftStatus persists permalink when provided", async () => {
+    await createDraft(sample, testDb);
+    await setDraftStatus(
+      "test-draft-1",
+      {
+        status: "published",
+        mediaId: "ig_456",
+        slideBlobUrls: ["https://blob/0.png"],
+        permalink: "https://www.instagram.com/p/abc123/",
+      },
+      testDb,
+    );
+    const row = await testDb.draft.findUnique({ where: { id: "test-draft-1" } });
+    expect(row?.permalink).toBe("https://www.instagram.com/p/abc123/");
+  });
+
+  test("getDraft returns PersistedDraft with status and permalink fields", async () => {
+    await createDraft(sample, testDb);
+    await setDraftStatus(
+      "test-draft-1",
+      {
+        status: "published",
+        mediaId: "ig_789",
+        slideBlobUrls: ["https://blob/0.png"],
+        permalink: "https://www.instagram.com/p/xyz789/",
+      },
+      testDb,
+    );
+    const draft = (await getDraft("test-draft-1", testDb)) as PersistedDraft;
+    expect(draft).not.toBeNull();
+    expect(draft.status).toBe("published");
+    expect(draft.mediaId).toBe("ig_789");
+    expect(draft.permalink).toBe("https://www.instagram.com/p/xyz789/");
+    expect(draft.publishedAt).not.toBeNull();
+  });
+
+  test("getDraft returns null permalink for pending draft", async () => {
+    await createDraft(sample, testDb);
+    const draft = (await getDraft("test-draft-1", testDb)) as PersistedDraft;
+    expect(draft).not.toBeNull();
+    expect(draft.status).toBe("pending");
+    expect(draft.mediaId).toBeNull();
+    expect(draft.permalink).toBeNull();
   });
 
   test("listDrafts filters by status", async () => {
