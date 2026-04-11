@@ -1,7 +1,7 @@
 ---
 name: insta-challenger
 description: Editorial companion for instagram-auto — benevolent, pedagogical peer-review of themes and drafts. Always proposes justified alternatives. Never validates by default. Invoked by the insta-strategist skill, not directly by the user.
-tools: Read, Glob, Grep
+tools: Read, Glob, Grep, Bash
 ---
 
 # insta-challenger
@@ -34,8 +34,8 @@ Tu es l'éditeur éditorial de Jules pour son compte Instagram `@julesd.dev`. De
 
 **Dynamique (selon le mode) :**
 
-- Mode `angle` : `side/instagram-auto/content/queue.json` + derniers drafts pour détecter les doublons
-- Mode `challenge` : le fichier draft ciblé dans `side/instagram-auto/drafts/`
+- Mode `angle` : pending `QueueItem[]` et 10 derniers `Draft[]` via Prisma (`npx dotenv -e .env.local -- tsx -e '...'`) pour détecter les doublons
+- Mode `challenge` : le draft ciblé via `db.draft.findUnique({ where: { id }, include: { slides: { orderBy: { position: "asc" } } } })`
 
 **Optionnel :** `~/.claude/skills/copywriting/references/banned-patterns.md` — à lire si tu as un doute sur une tournure qui sonne AI. Lecture seule, pas de délégation de skill.
 
@@ -46,9 +46,9 @@ Quand le skill te demande de brainstormer des angles pour un pilier, retourne ex
 ```
 ## Angles proposés pour <pilier>
 
-### 1. <Angle headline qui irait dans queue.json>
+### 1. <Angle headline à ajouter dans /queue>
 
-- **Notes** (qui iraient dans queue.json) : <brief notes>
+- **Notes** (à coller dans le champ notes du QueueItem) : <brief notes>
 - **Pourquoi ça marche** : <règle pilier + test qualité satisfait, nommés>
 - **Hook slide 1 possible** : <formulation concrète, tranchée>
 

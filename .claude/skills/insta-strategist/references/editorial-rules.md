@@ -47,7 +47,7 @@ Audience : pairs devs + juniors francophones. Langue : français exclusivement.
 - `SlideKind` = `"hook" | "content" | "cta"`
 - `Slide` = `{kind, title (1-140), body? (≤320), footer? (≤80)}`
 - `Draft` = `{id (kebab-case), createdAt (ISO), theme, slides[2..10], caption (1-2200), hashtags[≤30]}`
-- Queue item = `{theme, angle, notes?, cta?}` in `content/queue.json`
+- Queue item = `{theme, angle, notes?, cta?}` in the `QueueItem` table (`prisma/schema.prisma`), managed via `/queue` dashboard page
 
 ## Brand palette (layout constraints)
 

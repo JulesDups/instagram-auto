@@ -1,14 +1,14 @@
 ---
 name: insta-strategist
-description: Editorial strategist for the instagram-auto project — audits the queue, brainstorms new angles, and challenges drafts via the insta-challenger subagent. Project-scoped, French-only.
+description: Editorial strategist for the instagram-auto project — audits the queue, brainstorms new angles, and challenges drafts via the insta-challenger subagent. Project-scoped, French-only. Reads live state from Neon via Prisma.
 disable-model-invocation: true
-allowed-tools: Read, Glob, Grep, Agent
+allowed-tools: Read, Glob, Grep, Bash, Agent
 argument-hint: [queue | angle <pillar> | challenge <draft-id>]
 ---
 
 # insta-strategist
 
-Editorial strategist skill for the `instagram-auto` project. Orchestrates three modes — queue audit, angle brainstorm, draft challenge — and delegates all persona-driven editorial work to the `insta-challenger` subagent. Read-only on project files: the skill never modifies `content/queue.json`, `drafts/*.json`, or any app code.
+Editorial strategist skill for the `instagram-auto` project. Orchestrates three modes — queue audit, angle brainstorm, draft challenge — and delegates all persona-driven editorial work to the `insta-challenger` subagent. Read-only: the skill queries the Neon DB via Prisma (through `tsx`) and never mutates it. Writes happen only via the app dashboard (`/queue`, `/ideas`, `/preview/[id]`).
 
 ## Usage
 
@@ -33,11 +33,30 @@ Valid pillars: `tech-decryption`, `build-in-public`, `human-pro`.
 
 The skill has **no runtime dependency** on the `/copywriting` skill. Uninstalling `/copywriting` does not break this skill.
 
+## Data access helper
+
+All modes below query the live Neon DB via a one-shot `tsx` command. The canonical snapshot query:
+
+```bash
+npx dotenv -e .env.local -- tsx -e '
+import { PrismaClient } from "@prisma/client";
+const db = new PrismaClient();
+const [queue, drafts] = await Promise.all([
+  db.queueItem.findMany({ where: { consumed: false }, orderBy: { position: "asc" } }),
+  db.draft.findMany({ orderBy: { createdAt: "desc" }, take: 10, include: { slides: { orderBy: { position: "asc" } } } }),
+]);
+console.log(JSON.stringify({ queue, drafts }, null, 2));
+await db.$disconnect();
+'
+```
+
+The skill runs this via Bash, parses the JSON output, and uses it to compute stats. Never mutate the DB from a skill command — writes go through the dashboard (`/queue`, `/ideas`, `/preview/[id]`).
+
 ## Behavior — invocation without arguments
 
-1. Read `side/instagram-auto/content/queue.json` and count items per `theme`.
-2. Glob `side/instagram-auto/drafts/*.json`. Read the 10 most recent files (by `createdAt` descending). If fewer than 10 drafts exist, read all available.
-3. Compute the pillar distribution over those drafts as percentages.
+1. Run the snapshot query above. Parse `queue` and `drafts` from its output.
+2. Count items per `theme` in the queue.
+3. Compute the pillar distribution over the last 10 drafts as percentages.
 4. Identify the `theme` of the single most recent draft (the "last published pillar").
 5. Detect drift: any pillar more than ±10 points from its target (50 / 30 / 20).
 6. Display the snapshot + menu exactly in this format:
@@ -59,7 +78,7 @@ Que veux-tu faire ?
 
 ## Behavior — mode `queue`
 
-1. Read `content/queue.json` and all files in `drafts/*.json`.
+1. Run the snapshot query. Also run a second query to get the full set of published drafts for historical stats (`db.draft.findMany({ where: { status: "published" }, orderBy: { publishedAt: "desc" }, take: 10 })`).
 2. Compute:
    - Raw queue counts per pillar (absolute)
    - Queue distribution per pillar (percentages)
@@ -98,15 +117,15 @@ Que veux-tu faire ?
 <liste d'actions concrètes, max 5 points, formulées comme des verbes : "Réordonner #3 après #5", "Ajouter 2 angles human-pro (mode `angle`)", "Retirer le flag cta de #7 pour ajuster la cadence", etc.>
 ```
 
-4. **Do not write to `queue.json`.** Report only. The user edits the file manually.
+4. **Never mutate the DB.** Report only. The user edits via the `/queue` dashboard page.
 5. Do **not** invoke the subagent for this mode — it is pure data analysis.
 
 ## Behavior — mode `angle`
 
 1. Parse the pillar argument. Valid values: `tech-decryption`, `build-in-public`, `human-pro`. If missing or invalid, ask the user which pillar they want to brainstorm for.
-2. Read: `content/queue.json`, the 10 most recent drafts, `CLAUDE.md`, `lib/content.ts`.
+2. Run the snapshot query to get pending queue items + 10 most recent drafts. Read `CLAUDE.md`, `lib/content.ts`, and `prisma/schema.prisma` for context.
 3. Build a de-duplication list of already-covered angles:
-   - All `angle` fields from `content/queue.json`
+   - All `angle` fields from the pending queue
    - All first-slide `title` fields from the recent drafts
 4. Invoke the `insta-challenger` subagent via the Agent tool with this prompt template (fill in the placeholders):
 
@@ -126,7 +145,7 @@ Contexte Jules (à ancrer tes angles dessus) :
 
 Ton job :
 1. Génère 5 à 8 angles NOUVEAUX pour le pilier <pillar>, ancrés dans ce contexte.
-2. Pour chaque angle retenu, fournis : headline (niveau queue.json), notes (niveau queue.json), hook slide 1 possible, et la règle éditoriale / test qualité qui le valide.
+2. Pour chaque angle retenu, fournis : headline (niveau QueueItem.angle), notes (niveau QueueItem.notes), hook slide 1 possible, et la règle éditoriale / test qualité qui le valide.
 3. Rejette explicitement au moins 2 angles tièdes en expliquant pourquoi ils échouent (nom du test).
 4. Termine par une question ouverte pour l'itération.
 
@@ -134,13 +153,13 @@ Suis ton format de sortie standard pour le mode angle (défini dans ta fiche per
 ```
 
 5. Return the subagent output directly to the user, no post-processing.
-6. **Do not write to `queue.json`.** The user decides which angles to inject manually.
+6. **Never mutate the DB.** The user decides which angles to add manually via `/ideas` or `/queue` dashboard pages.
 
 ## Behavior — mode `challenge`
 
-1. Parse the draft ID argument. If missing, `Glob drafts/*.json`, list all draft IDs, and ask which one to challenge.
-2. Read the target draft: `drafts/<draft-id>.json`. If the file does not exist, report the error and list available drafts.
-3. Read supporting context: `CLAUDE.md`, `lib/content.ts`.
+1. Parse the draft ID argument. If missing, list available draft IDs via `npx dotenv -e .env.local -- tsx -e 'import { PrismaClient } from "@prisma/client"; const db = new PrismaClient(); console.log((await db.draft.findMany({ orderBy: { createdAt: "desc" }, select: { id: true, theme: true, status: true } })).map((d) => \`\${d.id} (\${d.theme}, \${d.status})\`).join("\n")); await db.$disconnect();'` and ask which one to challenge.
+2. Fetch the target draft via Prisma (`db.draft.findUnique({ where: { id: "<draft-id>" }, include: { slides: { orderBy: { position: "asc" } } } })`). If null, report the error.
+3. Read supporting context: `CLAUDE.md`, `lib/content.ts`, `prisma/schema.prisma`.
 4. Invoke the `insta-challenger` subagent via the Agent tool with this prompt template:
 
 ```
@@ -163,12 +182,12 @@ Suis ton format de sortie standard pour le mode challenge (défini dans ta fiche
 
 5. Return the subagent output to the user.
 6. If the user replies with a follow-up (e.g., "OK je prends l'option A pour la slide 2, retravaille la slide 4"), re-invoke the subagent with the updated context and the user's instructions. Loop until the user closes the iteration by saying they are satisfied or by changing modes.
-7. **Never modify the draft file directly.** The user hand-applies changes.
+7. **Never modify the draft in the DB directly.** The user hand-applies changes via `/preview/[id]` edit form.
 
 ## Hard boundaries
 
-- **Read-only on project files.** Never write to `content/queue.json`, `drafts/*.json`, or any app file.
-- **No ex-nihilo content generation.** This skill critiques and iterates; it does not produce initial drafts (that is the role of Claude.ai Scheduled Tasks).
+- **Read-only on the DB.** Never run `INSERT`, `UPDATE`, `DELETE`, or any write against Neon. Writes go through the dashboard.
+- **No ex-nihilo content generation.** This skill critiques and iterates; it does not produce initial drafts (that is the role of the Scheduled Task agent defined in `prompts/scheduled-task.md`).
 - **French output only.** All user-facing text and subagent prompts are in French. Code identifiers and English tech terms stay as-is.
 - **Project-scoped only.** Never apply to any directory other than `side/instagram-auto/`. If invoked from outside the project root, report that the skill is project-scoped and exit cleanly.
 - **No hook, no auto-trigger.** The skill only runs when the user invokes it. Drafts arriving via `/api/intake` are not auto-challenged.
