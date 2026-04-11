@@ -12,6 +12,9 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "."),
+      // server-only is a Next.js guard that throws in non-server environments.
+      // In Vitest (Node), we stub it out so repo modules can be imported directly.
+      "server-only": path.resolve(__dirname, "test/helpers/server-only-stub.ts"),
     },
   },
 });
