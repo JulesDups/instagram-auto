@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { PillarBadge } from "@/components/pillar-badge";
 import { loadManifest } from "@/lib/published";
 import { formatRelativeFrench } from "@/lib/stats";
+import { PublishButton } from "@/components/publish-button";
 
 export default async function PreviewPage({
   params,
@@ -83,17 +84,7 @@ export default async function PreviewPage({
                 État indéterminé
               </button>
             ) : (
-              <form
-                action={`/api/dashboard-publish/${draft.id}`}
-                method="POST"
-              >
-                <button
-                  type="submit"
-                  className="rounded-lg bg-[#1C343A] px-4 py-2 text-sm font-semibold text-[#FBFAF8] transition hover:bg-[#1C343A]/90"
-                >
-                  Publier sur Instagram
-                </button>
-              </form>
+              <PublishButton draftId={draft.id} />
             )
           )}
         </div>
