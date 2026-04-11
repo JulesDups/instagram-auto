@@ -1,48 +1,104 @@
 "use server";
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 import { z } from "zod";
-import { SlideSchema } from "@/lib/content";
+import { SlideSchema, type Slide, type SlideKind } from "@/lib/content";
 import {
   getDraft,
   setDraftStatus,
   updateDraftContent,
 } from "@/lib/repos/drafts";
+import {
+  type ActionResult,
+  successAction,
+  errorAction,
+} from "@/lib/action-result";
 
-const EditSchema = z.object({
-  caption: z.string().min(1).max(2200),
-  hashtags: z.string().transform((s) =>
-    s
-      .split(/\s+/)
-      .map((t) => t.replace(/^#/, ""))
-      .filter(Boolean),
-  ),
-  slides: z.string().transform((raw, ctx) => {
-    try {
-      const parsed = JSON.parse(raw);
-      return z.array(SlideSchema).min(2).max(10).parse(parsed);
-    } catch (err) {
-      ctx.addIssue({
-        code: "custom",
-        message: (err as Error).message,
-      });
-      return z.NEVER;
-    }
-  }),
-});
+const HASHTAG_SEPARATOR = /\s+/;
 
-export async function saveDraftAction(draftId: string, formData: FormData) {
-  const parsed = EditSchema.parse(Object.fromEntries(formData));
-  await updateDraftContent(draftId, parsed);
-  revalidatePath(`/preview/${draftId}`);
-  revalidatePath("/library");
+function parseHashtags(raw: string): string[] {
+  return raw
+    .split(HASHTAG_SEPARATOR)
+    .map((t) => t.replace(/^#/, "").trim())
+    .filter(Boolean);
 }
 
-export async function rejectDraftAction(draftId: string) {
+function parseSlides(formData: FormData): Slide[] {
+  const count = Number(formData.get("slide_count") ?? "0");
+  const slides: Slide[] = [];
+  for (let i = 0; i < count; i++) {
+    const kind = formData.get(`slide_${i}_kind`);
+    const title = formData.get(`slide_${i}_title`);
+    const body = formData.get(`slide_${i}_body`);
+    const footer = formData.get(`slide_${i}_footer`);
+    const slide = SlideSchema.parse({
+      kind: kind as SlideKind,
+      title: typeof title === "string" ? title : "",
+      body:
+        typeof body === "string" && body.trim() ? body : undefined,
+      footer:
+        typeof footer === "string" && footer.trim() ? footer : undefined,
+    });
+    slides.push(slide);
+  }
+  return slides;
+}
+
+const DraftMetaSchema = z.object({
+  id: z.string().min(1),
+  caption: z.string().min(1, "Caption vide").max(2200, "Caption trop longue"),
+  hashtags: z.string().max(2000),
+});
+
+export async function saveDraftAction(
+  _prev: ActionResult,
+  formData: FormData,
+): Promise<ActionResult> {
+  const meta = DraftMetaSchema.safeParse({
+    id: formData.get("id"),
+    caption: formData.get("caption"),
+    hashtags: formData.get("hashtags") ?? "",
+  });
+  if (!meta.success) {
+    return errorAction(meta.error.issues[0]?.message ?? "Entrée invalide");
+  }
+  let slides: Slide[];
+  try {
+    slides = parseSlides(formData);
+  } catch (err) {
+    return errorAction(
+      err instanceof Error ? err.message : "Slides invalides",
+    );
+  }
+  if (slides.length < 2 || slides.length > 10) {
+    return errorAction("Un carousel nécessite entre 2 et 10 slides");
+  }
+  try {
+    await updateDraftContent(meta.data.id, {
+      caption: meta.data.caption,
+      hashtags: parseHashtags(meta.data.hashtags),
+      slides,
+    });
+  } catch (err) {
+    return errorAction(
+      err instanceof Error ? err.message : "Erreur à la sauvegarde",
+    );
+  }
+  revalidatePath(`/preview/${meta.data.id}`);
+  revalidatePath("/library");
+  return successAction("Draft sauvegardé");
+}
+
+export async function rejectDraftAction(draftId: string): Promise<ActionResult> {
   const draft = await getDraft(draftId);
-  if (!draft) return;
-  await setDraftStatus(draftId, { status: "rejected" });
+  if (!draft) return errorAction("Draft introuvable");
+  try {
+    await setDraftStatus(draftId, { status: "rejected" });
+  } catch (err) {
+    return errorAction(
+      err instanceof Error ? err.message : "Erreur au rejet",
+    );
+  }
   revalidatePath(`/preview/${draftId}`);
   revalidatePath("/library");
-  redirect("/library?tab=rejected");
+  return successAction("Draft rejeté");
 }

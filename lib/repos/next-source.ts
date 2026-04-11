@@ -19,10 +19,10 @@ export type NextSource =
  * concurrent transaction won the row first and we fall through to the next source.
  */
 async function pickInTx(tx: Prisma.TransactionClient): Promise<NextSource> {
-  // 1. Ideas — oldest pending first
+  // 1. Ideas — lowest position pending first (user-reorderable; createdAt tiebreaker)
   const idea = await tx.idea.findFirst({
     where: { consumed: false },
-    orderBy: { createdAt: "asc" },
+    orderBy: [{ position: "asc" }, { createdAt: "asc" }],
   });
   if (idea) {
     const updated = await tx.idea.updateMany({

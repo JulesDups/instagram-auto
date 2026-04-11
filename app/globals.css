@@ -1,26 +1,128 @@
 @import "tailwindcss";
 
+/* ============================================================
+   Hegoatek Design System — Tailwind v4 tokens via @theme inline
+   ============================================================ */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #FBFAF8;
+  --foreground: #1C343A;
+
+  --hg-ink: #1C343A;
+  --hg-cream: #FBFAF8;
+  --hg-gold: #D4A374;
+  --hg-rust: #BF2C23;
+  --hg-moss: #6B8E23;
+
+  --hg-shadow-sm: 0 2px 8px rgba(28, 52, 58, 0.08);
+  --hg-shadow-md: 0 8px 24px rgba(28, 52, 58, 0.12);
+  --hg-shadow-lg: 0 20px 48px rgba(28, 52, 58, 0.18);
+  --hg-shadow-gold: 0 4px 24px rgba(212, 163, 116, 0.28);
+
+  --hg-ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --hg-ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --hg-dur-fast: 150ms;
+  --hg-dur-base: 250ms;
+  --hg-dur-slow: 500ms;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-hg-ink: var(--hg-ink);
+  --color-hg-cream: var(--hg-cream);
+  --color-hg-gold: var(--hg-gold);
+  --color-hg-rust: var(--hg-rust);
+  --color-hg-moss: var(--hg-moss);
+
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  --shadow-hg-sm: 0 2px 8px rgba(28, 52, 58, 0.08);
+  --shadow-hg-md: 0 8px 24px rgba(28, 52, 58, 0.12);
+  --shadow-hg-lg: 0 20px 48px rgba(28, 52, 58, 0.18);
+  --shadow-hg-gold: 0 4px 24px rgba(212, 163, 116, 0.28);
+
+  --animate-hg-reveal: hg-reveal 400ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  --animate-hg-fade: hg-fade 300ms ease both;
+  --animate-hg-slide-in-right: hg-slide-in-right 250ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  --animate-hg-slide-out-right: hg-slide-out-right 200ms ease-in both;
+  --animate-hg-toast-in: hg-toast-in 300ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  --animate-hg-toast-out: hg-toast-out 200ms ease-in both;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@keyframes hg-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes hg-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes hg-slide-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes hg-slide-out-right {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(24px);
+  }
+}
+
+@keyframes hg-toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes hg-toast-out {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.98);
   }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+}
+
+/* Globally ensure all buttons and role=button have pointer cursor when enabled */
+button:not(:disabled),
+[role="button"]:not([aria-disabled="true"]) {
+  cursor: pointer;
 }

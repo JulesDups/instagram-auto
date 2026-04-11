@@ -4,7 +4,7 @@ import { getDraft } from "@/lib/repos/drafts";
 import { formatRelativeFrench } from "@/lib/stats";
 import { PillarBadge } from "@/components/pillar-badge";
 import { PublishButton } from "@/components/publish-button";
-import { EditForm } from "./edit-form";
+import { PreviewSlideGrid, EditDraftButton } from "./preview-actions";
 
 export default async function PreviewPage({
   params,
@@ -20,44 +20,44 @@ export default async function PreviewPage({
 
   return (
     <div>
-      <div className="mb-6">
-        <PillarBadge theme={draft.theme} />
-        <h1 className="mt-3 text-3xl font-bold text-[#1C343A]">
-          Draft {draft.id}
-        </h1>
-        <p className="mt-1 text-sm text-[#1C343A]/50">
-          Créé le{" "}
-          {new Date(draft.createdAt).toLocaleString("fr-FR", {
-            dateStyle: "long",
-            timeStyle: "short",
-          })}{" "}
-          · {draft.slides.length} slides
-        </p>
+      <div className="mb-6 flex items-start justify-between gap-6">
+        <div>
+          <PillarBadge theme={draft.theme} />
+          <h1 className="mt-3 text-3xl font-bold text-hg-ink">Draft {draft.id}</h1>
+          <p className="mt-1 text-sm text-hg-ink/50">
+            Créé le{" "}
+            {new Date(draft.createdAt).toLocaleString("fr-FR", {
+              dateStyle: "long",
+              timeStyle: "short",
+            })}{" "}
+            · {draft.slides.length} slides
+          </p>
+        </div>
+        <EditDraftButton draft={draft} />
       </div>
 
-      <div className="mb-8 rounded-xl border border-[#1C343A]/10 bg-white p-4">
+      <div className="mb-8 rounded-xl border border-hg-ink/10 bg-white p-4 shadow-hg-sm">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             {isPublished ? (
               <>
-                <span className="h-2 w-2 rounded-full bg-emerald-500" />
-                <span className="text-sm font-semibold text-emerald-600">
+                <span className="h-2 w-2 rounded-full bg-hg-moss" />
+                <span className="text-sm font-semibold text-hg-moss">
                   Publié{" "}
-                  {draft.publishedAt &&
-                    formatRelativeFrench(draft.publishedAt)}
+                  {draft.publishedAt && formatRelativeFrench(draft.publishedAt)}
                 </span>
               </>
             ) : isRejected ? (
               <>
-                <span className="h-2 w-2 rounded-full bg-[#BF2C23]" />
-                <span className="text-sm font-semibold text-[#BF2C23]/80">
+                <span className="h-2 w-2 rounded-full bg-hg-rust" />
+                <span className="text-sm font-semibold text-hg-rust/80">
                   Rejeté
                 </span>
               </>
             ) : (
               <>
-                <span className="h-2 w-2 rounded-full bg-[#1C343A]/20" />
-                <span className="text-sm text-[#1C343A]/50">
+                <span className="h-2 w-2 rounded-full bg-hg-ink/20" />
+                <span className="text-sm text-hg-ink/50">
                   Pas encore publié
                 </span>
               </>
@@ -65,12 +65,10 @@ export default async function PreviewPage({
           </div>
           {isPublished ? (
             <a
-              href={
-                draft.permalink ?? "https://www.instagram.com/julesd.dev/"
-              }
+              href={draft.permalink ?? "https://www.instagram.com/julesd.dev/"}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-xs text-[#D4A374] underline"
+              className="text-xs font-medium text-hg-gold transition-colors duration-150 hover:text-hg-ink"
             >
               {draft.permalink ? "Voir ce post →" : "Voir sur Instagram"}
             </a>
@@ -79,12 +77,12 @@ export default async function PreviewPage({
           )}
         </div>
         {isPublished && draft.mediaId && (
-          <div className="mt-2 text-xs text-[#1C343A]/40">
+          <div className="mt-2 text-xs text-hg-ink/40">
             Media ID : <code className="font-mono">{draft.mediaId}</code>
           </div>
         )}
         {!isPublished && !isRejected && (
-          <p className="mt-3 text-xs text-[#1C343A]/40">
+          <p className="mt-3 text-xs text-hg-ink/40">
             Le clic déclenche le rendu des slides en PNG, l&apos;upload sur
             Vercel Blob, puis la publication via Instagram Graph API. Compte
             ~20-30 secondes avant de voir le résultat.
@@ -92,41 +90,15 @@ export default async function PreviewPage({
         )}
       </div>
 
-      <div className="grid grid-cols-3 gap-4">
-        {draft.slides.map((slide, i) => (
-          <div
-            key={i}
-            className="overflow-hidden rounded-xl border border-[#1C343A]/10 bg-white"
-          >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={`/api/render/${draft.id}/${i}`}
-              alt={`Slide ${i + 1}: ${slide.title}`}
-              width={1080}
-              height={1080}
-              className="aspect-square w-full object-cover"
-            />
-            <div className="border-t border-[#1C343A]/10 px-3 py-2 text-xs text-[#1C343A]/50">
-              {i + 1}. {slide.kind}
-            </div>
-          </div>
-        ))}
-      </div>
+      <PreviewSlideGrid draft={draft} />
 
       <section className="mt-12">
-        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-[#1C343A]/50">
+        <h2 className="mb-3 font-mono text-[10px] uppercase tracking-widest text-hg-ink/50">
           Caption
         </h2>
-        <pre className="whitespace-pre-wrap rounded-lg border border-[#1C343A]/10 bg-white p-4 text-sm text-[#1C343A]">
+        <pre className="whitespace-pre-wrap rounded-lg border border-hg-ink/10 bg-white p-4 text-sm text-hg-ink shadow-hg-sm">
           {buildFullCaption(draft)}
         </pre>
-      </section>
-
-      <section className="mt-12">
-        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-[#1C343A]/50">
-          Éditer le draft
-        </h2>
-        <EditForm draft={draft} />
       </section>
     </div>
   );

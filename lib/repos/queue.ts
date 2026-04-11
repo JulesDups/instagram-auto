@@ -99,6 +99,26 @@ export async function deleteQueueItem(
   await dbArg.queueItem.delete({ where: { id } });
 }
 
+export async function reorderQueueItems(
+  orderedIds: string[],
+  dbArg: DB = defaultDb,
+): Promise<void> {
+  // updateMany with `consumed: false` guard — see reorderIdeas for rationale.
+  const run = async (tx: DB) => {
+    for (const [i, id] of orderedIds.entries()) {
+      await tx.queueItem.updateMany({
+        where: { id, consumed: false },
+        data: { position: i },
+      });
+    }
+  };
+  if ("$transaction" in dbArg) {
+    await dbArg.$transaction(async (tx) => run(tx));
+  } else {
+    await run(dbArg);
+  }
+}
+
 function toRow(row: {
   id: string;
   theme: DbTheme;
