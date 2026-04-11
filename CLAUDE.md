@@ -52,6 +52,16 @@ Hard rules pour la génération (Claude.ai task prompt) :
 
 Audience : pairs devs + juniors francophones. Positionnement : dev full-stack freelance FR, décryptage tech + build in public.
 
+## Editorial priority order
+
+When the Scheduled Task runs, it selects the next draft source in this order :
+
+1. **`content/ideas.md`** — pop the first raw anecdote, transform into a full draft. Consumed in place.
+2. **`content/queue.json`** — if ideas.md is empty, pop the next queue item respecting pillar alternation.
+3. **Fallback rotation** — if both are empty, pick the pillar most under-represented over the last 7 published drafts and generate an exploratory sujet.
+
+The dashboard `/overview` shows the current stock of ideas as a stat card.
+
 ## Flow
 
 ```
@@ -81,6 +91,7 @@ Claude.ai Scheduled Task ──POST x-intake-secret──▶ /api/intake
 | `lib/content.ts` | `DraftSchema`, `SlideSchema`, `Theme` (3 pillars), `themeLabel`, `buildFullCaption`, `parseEmphasis`, `PILLAR_TARGET_DISTRIBUTION` |
 | `lib/drafts.ts` | fs I/O on `drafts/*.json` + `getDraftsWithStatus()` joining drafts with published manifest |
 | `lib/queue.ts` | fs I/O on `content/queue.json` (`loadQueue`, `saveQueue`, `QueueItemSchema`) |
+| `lib/ideas.ts` | Parser + loader for `content/ideas.md`, `parseIdeas()` (pure) + `loadIdeas()` (fs, returns empty on ENOENT) |
 | `lib/published.ts` | Vercel Blob manifest `meta/published.json`, `loadManifest` + `appendToManifest` |
 | `lib/stats.ts` | Overview helpers: weekly counts, last-7d distribution vs 50/30/20 target, `formatRelativeFrench` |
 | `lib/instagram.ts` | Graph API client + `waitForContainerReady` polling + `publishCarousel` |
@@ -132,6 +143,7 @@ Claude.ai Scheduled Task ──POST x-intake-secret──▶ /api/intake
 | Path | Role |
 |---|---|
 | `content/queue.json` | Editorial queue (FIFO), seeded with 15 items across the 3 pillars |
+| `content/ideas.md` | Raw anecdote file, consumed by Scheduled Task in priority over queue.json. Format : markdown, entries separated by `---` on its own line, optional `[hard-cta]` prefix on first line of an entry |
 | `drafts/sample.json` | 7-slide test draft, theme `tech-decryption` |
 
 ## Brand palette
