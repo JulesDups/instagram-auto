@@ -67,12 +67,12 @@ export default async function PreviewPage({
           </div>
           {publishedEntry ? (
             <a
-              href="https://www.instagram.com/julesd.dev/"
+              href={publishedEntry.permalink ?? "https://www.instagram.com/julesd.dev/"}
               target="_blank"
               rel="noopener noreferrer"
               className="text-xs text-[#D4A374] underline"
             >
-              Voir sur Instagram
+              {publishedEntry.permalink ? "Voir ce post →" : "Voir sur Instagram"}
             </a>
           ) : (
             manifestLoadFailed ? (

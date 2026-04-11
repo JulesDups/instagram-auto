@@ -2,7 +2,7 @@ import "server-only";
 import { put } from "@vercel/blob";
 import { env } from "./env";
 import { loadDraft } from "./drafts";
-import { publishCarousel, type PublishCarouselResult } from "./instagram";
+import { publishCarousel, getPermalink, type PublishCarouselResult } from "./instagram";
 import { buildFullCaption } from "./content";
 import { appendToManifest, loadManifest } from "./published";
 
@@ -64,6 +64,11 @@ export async function publishDraft(
     caption: buildFullCaption(draft),
   });
 
+  const permalink = await getPermalink(
+    result.mediaId,
+    env().META_PAGE_ACCESS_TOKEN,
+  );
+
   try {
     await appendToManifest({
       draftId,
@@ -72,6 +77,7 @@ export async function publishDraft(
       publishedAt: new Date().toISOString(),
       blobSlideUrls: imageUrls,
       captionPreview: draft.caption.slice(0, 200),
+      ...(permalink ? { permalink } : {}),
     });
   } catch (err) {
     console.error(

@@ -167,3 +167,18 @@ export async function publishCarousel(
 
   return { mediaId, childContainerIds, parentContainerId };
 }
+
+export async function getPermalink(
+  mediaId: string,
+  accessToken: string,
+): Promise<string | null> {
+  try {
+    const data = await igGet(`/${mediaId}`, {
+      fields: "permalink",
+      access_token: accessToken,
+    });
+    return typeof data.permalink === "string" ? data.permalink : null;
+  } catch {
+    return null;
+  }
+}

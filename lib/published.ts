@@ -12,6 +12,7 @@ export const PublishedEntrySchema = z.object({
   publishedAt: z.string().datetime(),
   blobSlideUrls: z.array(z.string().url()),
   captionPreview: z.string().max(500),
+  permalink: z.string().url().optional(),
 });
 export type PublishedEntry = z.infer<typeof PublishedEntrySchema>;
 
