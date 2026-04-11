@@ -103,7 +103,7 @@ export default async function PreviewPage({
             <code className="font-mono">{publishedEntry.mediaId}</code>
           </div>
         )}
-        {!publishedEntry && (
+        {!publishedEntry && !manifestLoadFailed && (
           <p className="mt-3 text-xs text-[#1C343A]/40">
             Le clic déclenche le rendu des slides en PNG, l&apos;upload sur
             Vercel Blob, puis la publication via Instagram Graph API. Compte
