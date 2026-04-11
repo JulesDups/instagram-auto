@@ -32,6 +32,13 @@ while IFS= read -r line || [[ -n "$line" ]]; do
   case "$line" in \#*) continue ;; esac
   key="${line%%=*}"
   value="${line#*=}"
+  # Strip surrounding quotes (dotenv convention). Without this, quoted values
+  # in .env.local get pushed to Vercel with literal quotes, breaking anything
+  # that parses URLs (e.g. ERR_INVALID_URL on Prisma DATABASE_URL).
+  value="${value#\"}"
+  value="${value%\"}"
+  value="${value#\'}"
+  value="${value%\'}"
   [[ -z "$value" ]] && continue
   case "$SKIP_KEYS" in *" $key "*) continue ;; esac
 
