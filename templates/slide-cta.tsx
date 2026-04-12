@@ -23,7 +23,7 @@ export function CtaSlide({ slide, theme }: Props) {
         backgroundColor: COLOR_TEXT,
         padding: 88,
         color: COLOR_BG,
-        fontFamily: "sans-serif",
+        fontFamily: "Inter",
       }}
     >
       <div

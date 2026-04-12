@@ -26,7 +26,7 @@ export function ContentSlide({ slide, theme, index, total }: Props) {
         backgroundColor: COLOR_BG,
         padding: 88,
         color: COLOR_TEXT,
-        fontFamily: "sans-serif",
+        fontFamily: "Inter",
       }}
     >
       <div

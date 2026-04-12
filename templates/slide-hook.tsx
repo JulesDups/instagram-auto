@@ -24,7 +24,7 @@ export function HookSlide({ slide, theme }: Props) {
         backgroundColor: COLOR_BG,
         padding: 88,
         color: COLOR_TEXT,
-        fontFamily: "sans-serif",
+        fontFamily: "Inter",
       }}
     >
       <div
