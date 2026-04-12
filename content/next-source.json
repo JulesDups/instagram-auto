@@ -1,9 +1,9 @@
 {
-  "exportedAt": "2026-04-12T14:40:00.075Z",
+  "exportedAt": "2026-04-12T15:04:58.890Z",
   "kind": "queue",
-  "sourceId": "cmnu6mk4l00077ec0rsznabx3",
-  "theme": "human-pro",
-  "angle": "3 ressources qui ont changé ma façon de coder (ni livres marketing, ni MOOC)",
-  "notes": "Jamais les recommandations bateau. Ressources concrètes : un repo, une chaîne, une newsletter ou une lib. Pourquoi chacune, et l'apprentissage transférable.",
+  "sourceId": "cmnu6mkjc000a7ec0swbe5ii7",
+  "theme": "tech-decryption",
+  "angle": "Angular 21 : ce que la communauté React rate vraiment",
+  "notes": "Mon background Angular 5 ans. Signals, defer, control flow. Pas du chauvinisme, des features qui mériteraient d'exister côté React.",
   "cta": false
 }
