@@ -6,7 +6,8 @@ System prompts utilisés par l'agent externe qui pilote le pipeline — typiquem
 
 | Fichier | Usage |
 |---|---|
-| `scheduled-task.md` | System prompt complet, **et rien d'autre**. Copier-coller intégral dans le trigger. |
+| `scheduled-task.md` | Prompt pour **trigger Claude Code** (Bash + curl + env vars `$INTAKE_SECRET` / `$PUBLIC_BASE_URL`). |
+| `scheduled-task-claude-ai.md` | Prompt pour **Claude.ai Scheduled Task** (outils HTTP intégrés, valeurs en dur, pas de shell). |
 
 ## Prérequis du trigger Claude Code
 

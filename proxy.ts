@@ -7,6 +7,7 @@ const PUBLIC_PATHS = ["/login", "/api/auth/login"];
 
 const PUBLIC_PREFIXES = [
   "/api/intake",
+  "/api/next-source",
   "/api/render",
   "/api/publish",
   "/api/reject",
