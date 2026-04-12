@@ -4,26 +4,28 @@
 
 Pipeline carousel Instagram. Claude.ai task → GET /api/next-source → POST /api/intake → Neon Postgres → Resend email validation → Instagram Graph API.
 
-Compte cible : Creator account (handle dans `.env.local`). Cadence : 4-5 posts / semaine. CTA unique : "Travailler avec moi → bio".
+Compte cible : Creator account (handle dans `.env.local`). Cadence : 4-5 posts / semaine. CTA contextuel par pilier (1 post sur 3).
 
 ## Editorial strategy
 
 | Pillar (`theme`) | Share | Description |
 |---|---|---|
-| `tech-decryption` | 50% | Frameworks, libs, écosystème Vercel, outils dev, comparaisons X vs Y, pièges classiques, hot takes. |
+| `tech-decryption` | 45% | Frameworks, libs, écosystème Vercel, outils dev, comparaisons X vs Y, pièges classiques, prises de position techniques. |
 | `build-in-public` | 30% | Side-project en cours (`instagram-auto`) : décisions d'archi, bugs marquants, before/after, métriques, abandons. |
-| `human-pro` | 20% | Retours d'expérience freelance, conseils juniors, setup, ressources, transition salarié→freelance. Toujours avec apprentissage transférable. |
+| `human-pro` | 25% | Retours d'expérience freelance, conseils juniors, setup, ressources, transition salarié→freelance. Toujours avec apprentissage transférable. |
 
 Hard rules pour la génération (Claude.ai task prompt) :
 - Jamais deux posts du même pilier à la suite
-- Slide 1 = hook contrarien, stat surprenante ou affirmation tranchée
+- Slide 1 = hook spécifique : observation inattendue, question que personne ne pose, stat surprenante, affirmation tranchée factuelle, ou contrarien sincère. Pas de clickbait creux.
 - 5–7 slides max, caption ≤ 150 mots
-- 1 post sur 3 contient le CTA "Travailler avec moi → bio" (champ `cta: true` dans la queue ou détecté par Claude.ai)
+- 1 post sur 3 contient le CTA contextuel adapté au pilier (champ `cta: true` dans la queue ou détecté par Claude.ai)
 - Les autres posts terminent par une question ouverte en commentaire
 - Tutoiement, vocabulaire tech en anglais, pas de "En tant que…", pas de fausse humilité, emojis interdits
-- Ton : sincère, informé, direct, personnel mais jamais autobiographique
+- Ton : sincère, informé, précis, chaleureux. Personnel et honnête, jamais performatif — le vécu sert d'illustration, pas de sujet en soi
+- Précision du mot juste : chaque terme porte son poids réel, pas de hedging ni de formules creuses
+- Vulnérabilité autorisée (adossée à un enseignement transférable) dans build-in-public et human-pro, exception rare dans tech-decryption
 
-Audience : pairs devs + juniors francophones. Positionnement : dev full-stack freelance FR, décryptage tech + build in public.
+Audience : pairs devs + juniors francophones. Positionnement : dev freelance FR qui montre son travail, ses choix et leurs conséquences. Décryptage tech + build in public.
 
 ## Editorial priority order
 
@@ -79,7 +81,7 @@ Claude.ai Scheduled Task ──GET x-intake-secret──▶ /api/next-source
 | `lib/repos/ideas.ts` | CRUD on `Idea` |
 | `lib/repos/published.ts` | Stats queries: `listPublished`, `getLastPublished`, `countPublishedThisWeek`, `getPillarDistribution` |
 | `lib/repos/next-source.ts` | Atomic `pickNextSource()` implementing priority ideas > queue > fallback (Serializable isolation + P2034 retry) |
-| `lib/stats.ts` | Overview helpers: weekly counts, last-7d distribution vs 50/30/20 target, `formatRelativeFrench` |
+| `lib/stats.ts` | Overview helpers: weekly counts, last-7d distribution vs 45/30/25 target, `formatRelativeFrench` |
 | `lib/instagram.ts` | Graph API client + `waitForContainerReady` polling + `publishCarousel` |
 | `lib/publish.ts` | `publishDraft(draftId)` orchestration render→Blob→IG→DB update |
 | `lib/email.ts` | Resend HTML draft review email with inline slide previews |
@@ -145,7 +147,7 @@ Body text uses `rgba(28, 52, 58, 0.65–0.72)` on cream and `rgba(251, 250, 248,
 
 ## Editorial queue
 
-Each `QueueItem` has `theme` (one of the three pillars), `angle` (the post premise / hook to develop), optional `notes` (extra context for Claude.ai task to ground the content authentically), and optional `cta: true` to mark a "Travailler avec moi → bio" hard CTA post (default = soft CTA = open question in caption). See `prisma/schema.prisma` for the full shape.
+Each `QueueItem` has `theme` (one of the three pillars), `angle` (the post premise / hook to develop), optional `notes` (extra context for Claude.ai task to ground the content authentically), and optional `cta: true` to mark a hard CTA post with formulation contextuelle par pilier (default = soft CTA = open question in caption). See `prisma/schema.prisma` for the full shape.
 
 Claude.ai task workflow:
 1. `GET /api/next-source` with `x-intake-secret` header → atomic pick (ideas > queue > fallback); source marked consumed in DB

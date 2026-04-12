@@ -58,7 +58,7 @@ The skill runs this via Bash, parses the JSON output, and uses it to compute sta
 2. Count items per `theme` in the queue.
 3. Compute the pillar distribution over the last 10 drafts as percentages.
 4. Identify the `theme` of the single most recent draft (the "last published pillar").
-5. Detect drift: any pillar more than ±10 points from its target (50 / 30 / 20).
+5. Detect drift: any pillar more than ±10 points from its target (45 / 30 / 25).
 6. Display the snapshot + menu exactly in this format:
 
 ```
@@ -94,9 +94,9 @@ Que veux-tu faire ?
 ### Distribution queue (<N> items)
 | Pilier | Queue count | Queue % | Target | Écart |
 |---|---|---|---|---|
-| tech-decryption | <n> | <%> | 50% | <±pts> |
+| tech-decryption | <n> | <%> | 45% | <±pts> |
 | build-in-public | <n> | <%> | 30% | <±pts> |
-| human-pro | <n> | <%> | 20% | <±pts> |
+| human-pro | <n> | <%> | 25% | <±pts> |
 
 ### Historique (10 derniers drafts)
 | Pilier | Count | % | Target | Écart |
@@ -187,7 +187,7 @@ Suis ton format de sortie standard pour le mode challenge (défini dans ta fiche
 ## Hard boundaries
 
 - **Read-only on the DB.** Never run `INSERT`, `UPDATE`, `DELETE`, or any write against Neon. Writes go through the dashboard.
-- **No ex-nihilo content generation.** This skill critiques and iterates; it does not produce initial drafts (that is the role of the Scheduled Task agent defined in `prompts/scheduled-task.md`).
+- **No ex-nihilo content generation.** This skill critiques and iterates; it does not produce initial drafts (that is the role of the Scheduled Task agent defined in `prompts/scheduled-task-claude-ai.md`).
 - **French output only.** All user-facing text and subagent prompts are in French. Code identifiers and English tech terms stay as-is.
 - **Project-scoped only.** Never apply to any directory other than `side/instagram-auto/`. If invoked from outside the project root, report that the skill is project-scoped and exit cleanly.
 - **No hook, no auto-trigger.** The skill only runs when the user invokes it. Drafts arriving via `/api/intake` are not auto-challenged.

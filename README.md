@@ -1,6 +1,6 @@
 # instagram-auto
 
-Pipeline automatisé de génération, édition et publication de carousels Instagram, piloté depuis un dashboard privé. Trois piliers éditoriaux : `tech-decryption` (50%), `build-in-public` (30%), `human-pro` (20%).
+Pipeline automatisé de génération, édition et publication de carousels Instagram, piloté depuis un dashboard privé. Trois piliers éditoriaux : `tech-decryption` (45%), `build-in-public` (30%), `human-pro` (25%).
 
 ## Architecture
 
@@ -73,7 +73,7 @@ instagram-auto/
 ├── templates/                        # slide-hook / slide-content / slide-cta (next/og)
 ├── test/                             # vitest suites pour repos + theme
 └── prompts/
-    └── scheduled-task.md             # system prompt de l'agent cron Claude Code
+    └── scheduled-task-claude-ai.md   # system prompt de la Claude.ai Scheduled Task
 ```
 
 ## Variables d'environnement

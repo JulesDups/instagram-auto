@@ -9,15 +9,15 @@ export type Theme = z.infer<typeof ThemeSchema>;
 
 /**
  * Editorial pillars target distribution for Claude.ai task to respect over time:
- * - tech-decryption: 50%
+ * - tech-decryption: 45%
  * - build-in-public: 30%
- * - human-pro: 20%
+ * - human-pro: 25%
  * Rule: never two posts from the same pillar in a row.
  */
 export const PILLAR_TARGET_DISTRIBUTION: Record<Theme, number> = {
-  "tech-decryption": 0.5,
+  "tech-decryption": 0.45,
   "build-in-public": 0.3,
-  "human-pro": 0.2,
+  "human-pro": 0.25,
 };
 
 export const SlideKindSchema = z.enum(["hook", "content", "cta"]);
