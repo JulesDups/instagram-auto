@@ -29,24 +29,6 @@ export async function POST(req: Request) {
   const rawBody = new TextDecoder("utf-8").decode(bodyBuffer); // pour le parsing JSON plus bas
   const signature = req.headers.get("x-hub-signature-256");
 
-  // DEBUG — à retirer après validation
-  // Calcule le HMAC attendu pour comparer avec ce que GitHub envoie
-  {
-    const enc = new TextEncoder();
-    const key = await crypto.subtle.importKey(
-      "raw", enc.encode(GITHUB_WEBHOOK_SECRET),
-      { name: "HMAC", hash: "SHA-256" }, false, ["sign"],
-    );
-    const sig = await crypto.subtle.sign("HMAC", key, bodyBuffer);
-    const expected = "sha256=" + Buffer.from(sig).toString("hex");
-    console.log(
-      `${LOG} debug secret_len=${GITHUB_WEBHOOK_SECRET.length}` +
-      ` body_len=${bodyBuffer.byteLength}` +
-      ` expected=${expected.slice(0, 25)}` +
-      ` received=${signature?.slice(0, 25)}`,
-    );
-  }
-
   try {
     await verifyGitHubWebhook(bodyBuffer, signature, GITHUB_WEBHOOK_SECRET);
   } catch (err) {
