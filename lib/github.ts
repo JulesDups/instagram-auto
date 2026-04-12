@@ -105,7 +105,7 @@ export async function writeGitHubFile(
  * Utilise une comparaison en temps constant pour prévenir les timing attacks.
  */
 export async function verifyGitHubWebhook(
-  rawBody: string,
+  rawBody: string | ArrayBuffer,
   signatureHeader: string | null,
   secret: string,
 ): Promise<void> {
@@ -121,7 +121,9 @@ export async function verifyGitHubWebhook(
     false,
     ["sign"],
   );
-  const sig = await crypto.subtle.sign("HMAC", key, encoder.encode(rawBody));
+  // Accept raw bytes directly to avoid string→bytes encoding round-trip issues
+  const bodyBytes = typeof rawBody === "string" ? encoder.encode(rawBody) : rawBody;
+  const sig = await crypto.subtle.sign("HMAC", key, bodyBytes);
   const expected = "sha256=" + Buffer.from(sig).toString("hex");
 
   // Comparaison en temps constant (évite les attaques par timing)

@@ -24,15 +24,31 @@ export async function POST(req: Request) {
 
   const { GITHUB_WEBHOOK_SECRET, GITHUB_TOKEN, GITHUB_REPO } = env();
 
-  // 1. Lire le body brut AVANT de parser (nécessaire pour la vérification HMAC)
-  const rawBody = await req.text();
+  // 1. Lire le body en bytes bruts pour éviter tout round-trip d'encodage string→bytes
+  const bodyBuffer = await req.arrayBuffer();
+  const rawBody = new TextDecoder("utf-8").decode(bodyBuffer); // pour le parsing JSON plus bas
   const signature = req.headers.get("x-hub-signature-256");
 
   // DEBUG — à retirer après validation
-  console.log(`${LOG} debug secret_len=${GITHUB_WEBHOOK_SECRET.length} body_len=${rawBody.length} sig_prefix=${signature?.slice(0, 16)}`);
+  // Calcule le HMAC attendu pour comparer avec ce que GitHub envoie
+  {
+    const enc = new TextEncoder();
+    const key = await crypto.subtle.importKey(
+      "raw", enc.encode(GITHUB_WEBHOOK_SECRET),
+      { name: "HMAC", hash: "SHA-256" }, false, ["sign"],
+    );
+    const sig = await crypto.subtle.sign("HMAC", key, bodyBuffer);
+    const expected = "sha256=" + Buffer.from(sig).toString("hex");
+    console.log(
+      `${LOG} debug secret_len=${GITHUB_WEBHOOK_SECRET.length}` +
+      ` body_len=${bodyBuffer.byteLength}` +
+      ` expected=${expected.slice(0, 25)}` +
+      ` received=${signature?.slice(0, 25)}`,
+    );
+  }
 
   try {
-    await verifyGitHubWebhook(rawBody, signature, GITHUB_WEBHOOK_SECRET);
+    await verifyGitHubWebhook(bodyBuffer, signature, GITHUB_WEBHOOK_SECRET);
   } catch (err) {
     console.warn(`${LOG} invalid signature:`, err);
     return NextResponse.json({ error: "invalid_signature" }, { status: 401 });
