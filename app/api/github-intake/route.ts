@@ -28,6 +28,9 @@ export async function POST(req: Request) {
   const rawBody = await req.text();
   const signature = req.headers.get("x-hub-signature-256");
 
+  // DEBUG — à retirer après validation
+  console.log(`${LOG} debug secret_len=${GITHUB_WEBHOOK_SECRET.length} body_len=${rawBody.length} sig_prefix=${signature?.slice(0, 16)}`);
+
   try {
     await verifyGitHubWebhook(rawBody, signature, GITHUB_WEBHOOK_SECRET);
   } catch (err) {
