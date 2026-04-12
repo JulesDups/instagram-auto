@@ -1,0 +1,42 @@
+{
+  "id": "angular-21-react-manque-20260412",
+  "createdAt": "2026-04-12T15:30:00.000Z",
+  "theme": "tech-decryption",
+  "sourceId": "cmnu6mkjc000a7ec0swbe5ii7",
+  "sourceKind": "queue",
+  "slides": [
+    {
+      "kind": "hook",
+      "title": "React est excellent. Angular **fait mieux** 3 choses que peu de gens ont remarquées.",
+      "body": "5 ans d'Angular, 3 ans de React. Ce n'est pas du chauvinisme — ce sont des features qui manquent côté React."
+    },
+    {
+      "kind": "content",
+      "title": "Signals : la **réactivité granulaire** que React n'a toujours pas",
+      "body": "Avec Signals, tu souscris exactement à la valeur qui change. Pas de re-render de composant entier. Pas de useEffect pour synchroniser l'état. C'est chirurgical."
+    },
+    {
+      "kind": "content",
+      "title": "@defer : le **lazy loading** déclaratif que React délègue à l'app",
+      "body": "En Angular, tu écris @defer (on viewport) { <HeavyComponent /> } dans le template. Pas de dynamic import, pas de Suspense à configurer. Zéro boilerplate."
+    },
+    {
+      "kind": "content",
+      "title": "Control flow **natif** : @if, @for optimisés à la compilation",
+      "body": "Fini les *ngIf imbriqués et les .map() dans le JSX. Le compilateur optimise les blocs @for avec un tracking automatique — diff plus précis, moins de travail pour le moteur."
+    },
+    {
+      "kind": "content",
+      "title": "React n'est pas **en retard** — il fait des choix différents",
+      "body": "RSC, Server Actions, le modèle de composition : React explore une direction qu'Angular ne suit pas. Les deux ont raison sur des axes différents. Le problème : la communauté React ignore ce qu'Angular a résolu."
+    },
+    {
+      "kind": "cta",
+      "title": "Ce que tu **gagnes** à regarder l'autre côté",
+      "body": "Pas besoin de changer de framework. Comprendre comment Angular résout ces problèmes te rend meilleur en React. L'inspiration est bidirectionnelle.",
+      "footer": "Follow @julesd.dev"
+    }
+  ],
+  "caption": "React est mon outil principal depuis 3 ans. Avant ça : 5 ans d'Angular sur des projets d'entreprise. Ce recul force à voir ce que chaque écosystème fait vraiment bien.\n\nAngular 21 a des features qui méritent qu'on s'y attarde : Signals pour la réactivité granulaire, @defer pour le lazy loading déclaratif, un control flow natif optimisé à la compilation.\n\nCe n'est pas un plaidoyer pour migrer. C'est un argument pour regarder au-delà de son propre écosystème.\n\nLes meilleures idées en dev ont toujours traversé les frontières des frameworks.\n\nEt toi — il y a une feature d'un autre framework que tu voudrais voir dans ton stack actuel ?",
+  "hashtags": ["angular", "reactjs", "angular21", "typescript", "frontend", "webdev", "signals", "frameworks", "javascript", "developpeur"]
+}
