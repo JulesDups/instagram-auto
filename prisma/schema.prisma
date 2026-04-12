@@ -25,27 +25,29 @@ enum DraftStatus {
 }
 
 model Idea {
-  id        String   @id @default(cuid())
-  text      String
-  hardCta   Boolean  @default(false)
-  consumed  Boolean  @default(false)
-  position  Int      @default(0)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id         String    @id @default(cuid())
+  text       String
+  hardCta    Boolean   @default(false)
+  consumed   Boolean   @default(false)
+  reservedAt DateTime?
+  position   Int       @default(0)
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
 
   @@index([consumed, position])
 }
 
 model QueueItem {
-  id        String   @id @default(cuid())
-  theme     Theme
-  angle     String
-  notes     String?
-  cta       Boolean  @default(false)
-  consumed  Boolean  @default(false)
-  position  Int
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id         String    @id @default(cuid())
+  theme      Theme
+  angle      String
+  notes      String?
+  cta        Boolean   @default(false)
+  consumed   Boolean   @default(false)
+  reservedAt DateTime?
+  position   Int
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
 
   @@index([consumed, position])
 }

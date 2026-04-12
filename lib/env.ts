@@ -18,6 +18,16 @@ const envSchema = z.object({
 
   PUBLIC_BASE_URL: z.string().url(),
 
+  GITHUB_TOKEN: z.string().min(1),
+  GITHUB_REPO: z
+    .string()
+    .regex(
+      /^[\w.-]+\/[\w.-]+$/,
+      "Format attendu : owner/repo (ex: JulesDups/instagram-auto)",
+    ),
+  GITHUB_WEBHOOK_SECRET: z.string().min(32),
+  CRON_SECRET: z.string().min(32),
+
   DASHBOARD_PASSWORD: z.string().min(8, "Minimum 8 caractères"),
   DASHBOARD_COOKIE_SECRET: z
     .string()

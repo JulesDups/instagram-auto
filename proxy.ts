@@ -11,6 +11,8 @@ const PUBLIC_PREFIXES = [
   "/api/render",
   "/api/publish",
   "/api/reject",
+  "/api/github-intake",
+  "/api/cron",
   "/_next",
   "/favicon",
 ];

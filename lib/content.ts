@@ -43,6 +43,10 @@ export const DraftSchema = z.object({
     .array(z.string().regex(/^#?[\w-]+$/))
     .max(30)
     .default([]),
+  /** Opaque ID of the source that was reserved by GET /api/next-source. */
+  sourceId: z.string().optional(),
+  /** Kind of the reserved source — used by POST /api/intake to commit consumed=true. */
+  sourceKind: z.enum(["idea", "queue", "fallback"]).optional(),
 });
 export type Draft = z.infer<typeof DraftSchema>;
 

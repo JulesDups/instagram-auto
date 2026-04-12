@@ -19,6 +19,7 @@ describe("next-source", () => {
     if (result.kind === "idea") {
       expect(result.text).toBe("idea A");
       expect(result.hardCta).toBe(true);
+      expect(result.sourceId).toBeTruthy();
     }
   });
 
@@ -32,6 +33,7 @@ describe("next-source", () => {
     if (result.kind === "queue") {
       expect(result.angle).toBe("queue A");
       expect(result.theme).toBe("tech-decryption");
+      expect(result.sourceId).toBeTruthy();
     }
   });
 
@@ -66,18 +68,29 @@ describe("next-source", () => {
     }
   });
 
-  test("picking an idea marks it consumed atomically", async () => {
+  test("picking an idea sets reservedAt and keeps consumed=false", async () => {
     const idea = await createIdea({ text: "idea A", hardCta: false }, testDb);
     await pickNextSource(testDb);
     const fresh = await testDb.idea.findUnique({ where: { id: idea.id } });
-    expect(fresh?.consumed).toBe(true);
+    expect(fresh?.consumed).toBe(false);
+    expect(fresh?.reservedAt).toBeInstanceOf(Date);
   });
 
-  test("picking a queue item marks it consumed atomically", async () => {
+  test("picking a queue item sets reservedAt and keeps consumed=false", async () => {
     const q = await createQueueItem({ theme: "tech-decryption", angle: "A" }, testDb);
     await pickNextSource(testDb);
     const fresh = await testDb.queueItem.findUnique({ where: { id: q.id } });
-    expect(fresh?.consumed).toBe(true);
+    expect(fresh?.consumed).toBe(false);
+    expect(fresh?.reservedAt).toBeInstanceOf(Date);
+  });
+
+  test("reserved idea is not picked again before TTL expires", async () => {
+    await createIdea({ text: "idea A", hardCta: false }, testDb);
+    const first = await pickNextSource(testDb);
+    expect(first.kind).toBe("idea");
+    // Second call should not return the same idea (it's reserved)
+    const second = await pickNextSource(testDb);
+    expect(second.kind).not.toBe("idea");
   });
 
   test("concurrent calls never return the same idea", async () => {

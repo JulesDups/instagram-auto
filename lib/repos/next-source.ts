@@ -8,46 +8,61 @@ import { themeFromDb } from "@/lib/theme";
 type DB = PrismaClient | Prisma.TransactionClient;
 
 export type NextSource =
-  | { kind: "idea"; text: string; hardCta: boolean }
-  | { kind: "queue"; theme: Theme; angle: string; notes?: string; cta: boolean }
+  | { kind: "idea"; sourceId: string; text: string; hardCta: boolean }
+  | { kind: "queue"; sourceId: string; theme: Theme; angle: string; notes?: string; cta: boolean }
   | { kind: "fallback"; theme: Theme };
+
+/** Pipeline lent (cron → Claude.ai Task → GitHub webhook) : couvre un cycle journalier complet. */
+const RESERVATION_TTL_MS = 24 * 60 * 60 * 1000; // 24 heures
 
 /**
  * Core logic executed inside a serializable transaction.
  * Priority: ideas (oldest first) → queue (lowest position first) → fallback (most under-represented pillar).
- * Uses conditional updateMany with `consumed: false` guard to detect races — if count === 0, another
- * concurrent transaction won the row first and we fall through to the next source.
+ *
+ * Sources are *reserved* (reservedAt = now) rather than immediately consumed.
+ * The calling code (POST /api/intake) commits the final consumed = true once the draft is persisted.
+ * Reservations expire after RESERVATION_TTL_MS so a failed intake cycle doesn't permanently lose a source.
+ *
+ * Uses conditional updateMany with the same reservedAt guard to detect races —
+ * if count === 0, another concurrent transaction won the row first and we fall through to the next source.
  */
 async function pickInTx(tx: Prisma.TransactionClient): Promise<NextSource> {
+  const staleThreshold = new Date(Date.now() - RESERVATION_TTL_MS);
+  const available = {
+    consumed: false,
+    OR: [{ reservedAt: null }, { reservedAt: { lt: staleThreshold } }],
+  };
+
   // 1. Ideas — lowest position pending first (user-reorderable; createdAt tiebreaker)
   const idea = await tx.idea.findFirst({
-    where: { consumed: false },
+    where: available,
     orderBy: [{ position: "asc" }, { createdAt: "asc" }],
   });
   if (idea) {
     const updated = await tx.idea.updateMany({
-      where: { id: idea.id, consumed: false },
-      data: { consumed: true },
+      where: { id: idea.id, ...available },
+      data: { reservedAt: new Date() },
     });
     if (updated.count === 1) {
-      return { kind: "idea", text: idea.text, hardCta: idea.hardCta };
+      return { kind: "idea", sourceId: idea.id, text: idea.text, hardCta: idea.hardCta };
     }
-    // Lost the race — another concurrent tx consumed this idea. Fall through to queue.
+    // Lost the race — another concurrent tx reserved this idea. Fall through to queue.
   }
 
   // 2. Queue — lowest position pending first
   const queue = await tx.queueItem.findFirst({
-    where: { consumed: false },
+    where: available,
     orderBy: { position: "asc" },
   });
   if (queue) {
     const updated = await tx.queueItem.updateMany({
-      where: { id: queue.id, consumed: false },
-      data: { consumed: true },
+      where: { id: queue.id, ...available },
+      data: { reservedAt: new Date() },
     });
     if (updated.count === 1) {
       return {
         kind: "queue",
+        sourceId: queue.id,
         theme: themeFromDb(queue.theme),
         angle: queue.angle,
         notes: queue.notes ?? undefined,
@@ -57,7 +72,7 @@ async function pickInTx(tx: Prisma.TransactionClient): Promise<NextSource> {
     // Lost the race — fall through to fallback.
   }
 
-  // 3. Fallback — no consumption, pick most under-represented pillar over last 7 published drafts.
+  // 3. Fallback — no reservation needed, pick most under-represented pillar over last 7 published drafts.
   const recent = await tx.draft.findMany({
     where: { status: DraftStatus.published },
     orderBy: { publishedAt: "desc" },

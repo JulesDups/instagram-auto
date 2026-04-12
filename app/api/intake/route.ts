@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { env } from "@/lib/env";
 import { DraftSchema } from "@/lib/content";
 import { createDraft } from "@/lib/repos/drafts";
+import { markIdeaConsumed } from "@/lib/repos/ideas";
+import { markQueueItemConsumed } from "@/lib/repos/queue";
 import { sendDraftReviewEmail } from "@/lib/email";
 
 export const runtime = "nodejs";
@@ -34,6 +36,20 @@ export async function POST(req: Request) {
   } catch (err) {
     console.error("[intake] createDraft failed:", err);
     return NextResponse.json({ error: "persistence failed" }, { status: 500 });
+  }
+
+  // Commit the source reservation now that the draft is safely persisted.
+  if (draft.sourceId) {
+    try {
+      if (draft.sourceKind === "idea") {
+        await markIdeaConsumed(draft.sourceId);
+      } else if (draft.sourceKind === "queue") {
+        await markQueueItemConsumed(draft.sourceId);
+      }
+    } catch (err) {
+      // Non-fatal: draft is already persisted. Log and continue.
+      console.error("[intake] markConsumed failed:", err);
+    }
   }
 
   await sendDraftReviewEmail(draft);
