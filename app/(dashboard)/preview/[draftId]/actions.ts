@@ -102,3 +102,19 @@ export async function rejectDraftAction(draftId: string): Promise<ActionResult> 
   revalidatePath("/library");
   return successAction("Draft rejeté");
 }
+
+export async function resetToPendingAction(draftId: string): Promise<ActionResult> {
+  const draft = await getDraft(draftId);
+  if (!draft) return errorAction("Draft introuvable");
+  if (draft.status !== "published") return errorAction("Le draft n'est pas publié");
+  try {
+    await setDraftStatus(draftId, { status: "pending" });
+  } catch (err) {
+    return errorAction(
+      err instanceof Error ? err.message : "Erreur au reset",
+    );
+  }
+  revalidatePath(`/preview/${draftId}`);
+  revalidatePath("/library");
+  return successAction("Draft remis en attente");
+}

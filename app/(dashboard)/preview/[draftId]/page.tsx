@@ -4,6 +4,7 @@ import { getDraft } from "@/lib/repos/drafts";
 import { formatRelativeFrench } from "@/lib/stats";
 import { PillarBadge } from "@/components/pillar-badge";
 import { PublishButton } from "@/components/publish-button";
+import { RepublishButton } from "@/components/republish-button";
 import { PreviewSlideGrid, EditDraftButton } from "./preview-actions";
 
 export default async function PreviewPage({
@@ -64,14 +65,17 @@ export default async function PreviewPage({
             )}
           </div>
           {isPublished ? (
-            <a
-              href={draft.permalink ?? "https://www.instagram.com/julesd.dev/"}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-xs font-medium text-hg-gold transition-colors duration-150 hover:text-hg-ink"
-            >
-              {draft.permalink ? "Voir ce post →" : "Voir sur Instagram"}
-            </a>
+            <div className="flex items-center gap-3">
+              <a
+                href={draft.permalink ?? "https://www.instagram.com/julesd.dev/"}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs font-medium text-hg-gold transition-colors duration-150 hover:text-hg-ink"
+              >
+                {draft.permalink ? "Voir ce post →" : "Voir sur Instagram"}
+              </a>
+              <RepublishButton draftId={draft.id} />
+            </div>
           ) : isRejected ? null : (
             <PublishButton draftId={draft.id} />
           )}
