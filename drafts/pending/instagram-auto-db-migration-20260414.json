@@ -1,0 +1,37 @@
+{
+  "id": "instagram-auto-db-migration-20260414",
+  "createdAt": "2026-04-14T18:15:00.000Z",
+  "theme": "build-in-public",
+  "sourceId": "cmnvwl2vc000004jsqvs12y07",
+  "sourceKind": "idea",
+  "slides": [
+    {
+      "kind": "hook",
+      "title": "Poster automatiquement sur Instagram, c'est 40 lignes. **Gérer l'état** de façon fiable, c'est une migration complète.",
+      "body": "Comment instagram-auto est passé d'un fichier JSON à Postgres, Vercel Crons et webhooks GitHub."
+    },
+    {
+      "kind": "content",
+      "title": "La v1 : l'état dans un fichier sur **Vercel Blob**. Fonctionnel, fragile.",
+      "body": "Chaque publication écrivait `meta/published.json`. Ça suffisait pour prototyper : lire, écrire, calculer la distribution des piliers. Mais pas de requêtes, pas d'historique vrai, pas de transactions."
+    },
+    {
+      "kind": "content",
+      "title": "La v2 : **Neon Postgres** via Prisma. Un row par draft, un par item de queue.",
+      "body": "L'alternance des piliers, les stats hebdomadaires, la priorité idées > queue > fallback : tout devient une query SQL. Plus de fichier à relire et réécrire à chaque action. La source est marquée consommée en transaction Serializable."
+    },
+    {
+      "kind": "content",
+      "title": "Le déclencheur : Vercel Cron + webhook **GitHub**. Le cycle tourne sans intervention.",
+      "body": "Le cron appelle `/api/next-source`, qui retourne la prochaine source et la marque consommée. Claude.ai génère le draft, `POST /api/intake` le persiste en base. Le webhook GitHub peut relancer le cycle quand une nouvelle idée est déposée."
+    },
+    {
+      "kind": "cta",
+      "title": "Ce qui a changé : un **side project** qui tient à l'usage, pas juste au prototype.",
+      "body": "La migration a pris plus de temps que le feature initial. C'est souvent ça, le vrai travail.",
+      "footer": "Follow @julesd.dev"
+    }
+  ],
+  "caption": "instagram-auto a commencé avec un fichier JSON pour stocker l'état des publications. Pratique pour valider le concept, insuffisant pour la suite.\n\nLa migration vers Postgres a forcé à penser en termes de transactions, de requêtes, de cohérence. Ce que le fichier plat cachait sous une fausse simplicité, la base de données l'a rendu visible : la priorité des sources, l'alternance des piliers, les stats de distribution — tout ça nécessite des vraies requêtes.\n\nLes crons Vercel et les webhooks GitHub ont complété le puzzle : déclencher le cycle de génération sans intervention manuelle, que ce soit par une planification ou par l'ajout d'une nouvelle idée dans l'appli.\n\nAu total : plus de code, plus de surface de débogage, mais un système qui tient à l'usage.\n\nToi, quand est-ce que tu as su qu'un prototype avait besoin de devenir une vraie infra ?",
+  "hashtags": ["build-in-public", "nextjs", "postgres", "prisma", "vercel", "sideproject", "developpeur-freelance", "typescript", "automation", "indie-maker"]
+}
