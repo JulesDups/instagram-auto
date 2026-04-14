@@ -7,6 +7,14 @@ const COLOR_BG = "#FBFAF8";
 const COLOR_ACCENT = "#D4A374";
 const COLOR_HIGHLIGHT = "#BF2C23";
 
+function titleFontSize(text: string): number {
+  const len = text.replace(/\*\*/g, "").length;
+  if (len <= 50) return 76;
+  if (len <= 80) return 64;
+  if (len <= 110) return 54;
+  return 46;
+}
+
 interface Props {
   slide: Slide;
   theme: Theme;
@@ -80,7 +88,7 @@ export function ContentSlide({ slide, theme, index, total }: Props) {
       >
         <EmphasizedText
           text={slide.title}
-          fontSize={76}
+          fontSize={titleFontSize(slide.title)}
           fontWeight={800}
           lineHeight={1.1}
           letterSpacing={-1.5}
