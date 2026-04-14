@@ -1,7 +1,7 @@
 {
-  "exportedAt": "2026-04-14T07:06:55.161Z",
+  "exportedAt": "2026-04-14T17:00:56.636Z",
   "kind": "idea",
-  "sourceId": "cmnvwilmb000004ky36uxun61",
-  "text": "J'ai amélioré l'application Instagram auto côté UI en utilisant **Claude Code** et le plugin **Superpowers**, c'est vraiment bluffant ! \r\nJ'en ai profité pour créer une direction artistique qui reprend les codes de mon portfolio disponible sur www.julesdupuis.fr. La suite, c'est de travailler sur un projet d'une amie kiné pour un meilleur suivi des programmes et des exercices à faire à la maison pour sa patientèle.\r\nL'objectif, c'est d'en faire une appli assez générique pour pouvoir en faire un SaaS à prix honnête et réellement utile avec un retour utilisateur très rapide !",
-  "hardCta": true
+  "sourceId": "cmnvwl2vc000004jsqvs12y07",
+  "text": "J'ai du adapter mon application Instagram-auto pour gérer le nouveau système où tout est stocké en base de donnée et utiliser des crons : vercel et webhook github pour déclencher l'écriture de mes posts avec les anecdotes que j'écris dans mon appli.",
+  "hardCta": false
 }
