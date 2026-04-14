@@ -1,0 +1,37 @@
+{
+  "id": "angular-21-react-manque-20260413",
+  "createdAt": "2026-04-13T08:00:00Z",
+  "theme": "tech-decryption",
+  "sourceId": "cmnu6mkjc000a7ec0swbe5ii7",
+  "sourceKind": "queue",
+  "slides": [
+    {
+      "kind": "hook",
+      "title": "La communauté React réinvente **Signals** en 2025. Angular les a en production depuis 2023.",
+      "body": "5 ans d'Angular, puis React comme stack principale. Pas de chauvinisme : trois features Angular qui méritent un regard honnête."
+    },
+    {
+      "kind": "content",
+      "title": "Signals : réactivité **granulaire** native depuis Angular v16",
+      "body": "Un signal change → seul le composant abonné re-render. Pas de réconciliation globale, pas de memo à écrire. React Compiler essaie d'automatiser ça. Angular l'a conçu intentionnellement."
+    },
+    {
+      "kind": "content",
+      "title": "@defer : lazy rendering **déclaratif** en une ligne de template",
+      "body": "@defer (on viewport) charge le composant quand il entre dans le viewport — lazy loading, Suspense et IntersectionObserver combinés. Dans React, tu assembles les trois pièces toi-même."
+    },
+    {
+      "kind": "content",
+      "title": "Control flow **natif** : @if, @for, @switch dans les templates",
+      "body": "La logique de rendu sort du JSX. Plus de && et ternaires dans le markup. Typé, lisible, séparé du JS. Petit changement, grand impact sur les code reviews."
+    },
+    {
+      "kind": "cta",
+      "title": "Trois patterns qui **réduisent** la surface de décision du dev",
+      "body": "Réactivité granulaire, lazy déclaratif, séparation template/logique. Des idées empruntables, pas une religion de framework.",
+      "footer": "Follow @julesd.dev"
+    }
+  ],
+  "caption": "5 ans d'Angular, puis React comme stack principale. Je ne milite pas pour un framework.\n\nMais certaines décisions d'Angular méritent qu'on s'y arrête.\n\nSignals : réactivité granulaire native, sans store externe ni mémoïsation défensive. React Compiler tente de s'en approcher automatiquement — Angular l'a construit intentionnellement depuis v16.\n\n@defer : lazy + Suspense + IntersectionObserver en une déclaration de template. Simple, lisible, zéro configuration.\n\nLe control flow (@if, @for) : logique de rendu hors du JSX. Moins de && et ternaires dans le markup, plus de clarté sur les reviews.\n\nCes trois features réduisent la surface de décision du dev sans sacrifier la flexibilité.\n\nTu as déjà emprunté une idée d'un autre framework et changé ta façon de coder ?",
+  "hashtags": ["angular", "react", "signals", "frontend", "webdev", "javascript", "typescript", "nextjs", "freelance"]
+}
