@@ -194,6 +194,7 @@ Use sparingly: 1 punchline per slide max, mirroring the user's site (`Vous crée
 - **Vercel hooks** : auto-skill-loading fires aggressively on `app/**`, `next.config.*`, `.env.*`, `@vercel/blob` imports. Tolerate or use the suggested skills.
 - **Neon + Prisma** : `DATABASE_URL` is the pooled connection (for runtime), `DIRECT_URL` is the direct connection (for migrations). Both must be set in `.env.local` and Vercel env vars. Tests use `TEST_DATABASE_URL` (separate Neon branch) — see `vitest.config.ts` for file parallelism disabled to avoid shared-DB leakage.
 - **`server-only` + Vitest** : `lib/*` files use `import "server-only"` which Next.js resolves at build time. Vitest can't resolve it, so `vitest.config.ts` aliases it to `test/helpers/server-only-stub.ts` (no-op export).
+- **Réservation d'idée bloquée (TTL vs cron)** : `RESERVATION_TTL_MS` dans `lib/repos/next-source.ts` est fixé à 12h. Toute réservation faite après 16:00 UTC est garantie stale au cron de 04:00 UTC le lendemain. Si une idée reste `consumed=false, reservedAt≠null` depuis >12h, remettre `reservedAt=null` en DB suffit. Ne pas repasser à 24h : le cron raterait les réservations faites entre 04:00 et 24:00 la veille.
 
 ## Commands
 

@@ -12,8 +12,9 @@ export type NextSource =
   | { kind: "queue"; sourceId: string; theme: Theme; angle: string; notes?: string; cta: boolean }
   | { kind: "fallback"; theme: Theme };
 
-/** Pipeline lent (cron → Claude.ai Task → GitHub webhook) : couvre un cycle journalier complet. */
-const RESERVATION_TTL_MS = 24 * 60 * 60 * 1000; // 24 heures
+/** TTL suffisant pour couvrir le pipeline async (cron 04:00 → Claude.ai → webhook),
+ *  mais assez court pour qu'une réservation ratée soit stale au cron du lendemain (04:00). */
+const RESERVATION_TTL_MS = 12 * 60 * 60 * 1000; // 12 heures
 
 /**
  * Core logic executed inside a serializable transaction.
