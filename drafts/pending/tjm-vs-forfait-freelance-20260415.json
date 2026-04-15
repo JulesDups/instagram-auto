@@ -1,0 +1,36 @@
+{
+  "id": "tjm-vs-forfait-freelance-20260415",
+  "createdAt": "2026-04-15T09:15:00Z",
+  "theme": "human-pro",
+  "sourceKind": "fallback",
+  "slides": [
+    {
+      "kind": "hook",
+      "title": "**Facturer à la journée**, c'est demander au client de juger ton temps, pas ton travail.",
+      "body": "Ce n'est pas un problème de tarif. C'est un problème de posture."
+    },
+    {
+      "kind": "content",
+      "title": "Le client compte les **jours**, pas le résultat",
+      "body": "Quand tu factures à la journée, son attention va naturellement au volume. Pourquoi ça prend autant ? Pourquoi pas moins ? Tu justifies du temps, pas de la valeur livrée."
+    },
+    {
+      "kind": "content",
+      "title": "Un forfait scopé, tu vends un **résultat**",
+      "body": "La conversation change. \"Ce module livré\" vs \"X jours à Y€\". Le client achète ce qu'il obtient. Il pense moins à comment tu passes ton temps."
+    },
+    {
+      "kind": "content",
+      "title": "Le **risque** se déplace — et c'est voulu",
+      "body": "En forfait, tu portes le risque d'estimation. En échange, tu contrôles ta méthode, ton rythme, ton organisation. Ce troc te remet en posture d'artisan, pas d'exécutant."
+    },
+    {
+      "kind": "cta",
+      "title": "La vraie question : tu vends du **temps** ou un résultat ?",
+      "body": "Le TJM a sa logique — support, intégration longue durée. Mais choisir de le garder ou non, ça commence par savoir ce que tu vends vraiment.",
+      "footer": "Follow @julesd.dev"
+    }
+  ],
+  "caption": "La TJM, c'est pratique à comparer sur les plateformes. Mais ça structure mal la relation client.\n\nQuand tu factures à la journée, la discussion tourne autour du volume — pas de la valeur livrée. Le client optimise ses jours, toi tu justifies ton temps.\n\nEn passant à des forfaits scopés, deux choses changent : tu portes le risque d'estimation, et tu récupères le contrôle de ta méthode. Ce troc, c'est ce qui t'emmène de prestataire à artisan.\n\nCertains contextes — support, intégration longue — ont une logique TJM qui tient. Mais la question mérite d'être posée avant de signer.\n\nEt toi, tu factures comment tes missions ?",
+  "hashtags": ["freelance", "devfreelance", "freelanceweb", "developpeurweb", "tarification", "independant", "freelancefrance", "conseilspro"]
+}
