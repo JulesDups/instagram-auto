@@ -1,7 +1,5 @@
 {
-  "exportedAt": "2026-04-14T17:00:56.636Z",
-  "kind": "idea",
-  "sourceId": "cmnvwl2vc000004jsqvs12y07",
-  "text": "J'ai du adapter mon application Instagram-auto pour gérer le nouveau système où tout est stocké en base de donnée et utiliser des crons : vercel et webhook github pour déclencher l'écriture de mes posts avec les anecdotes que j'écris dans mon appli.",
-  "hardCta": false
+  "exportedAt": "2026-04-15T04:56:30.361Z",
+  "kind": "fallback",
+  "theme": "human-pro"
 }
