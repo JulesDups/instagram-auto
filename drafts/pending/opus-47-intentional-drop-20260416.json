@@ -1,0 +1,37 @@
+{
+  "id": "opus-47-intentional-drop-20260416",
+  "createdAt": "2026-04-16T05:30:00.000Z",
+  "theme": "tech-decryption",
+  "sourceId": "cmo05r0c8000004joemk47uj9",
+  "sourceKind": "idea",
+  "slides": [
+    {
+      "kind": "hook",
+      "title": "La baisse de perf d'Opus 4.6, c'était **volontaire**.",
+      "body": "Pas un bug. Anthropic économisait du compute en avance pour préparer la release de cette semaine."
+    },
+    {
+      "kind": "content",
+      "title": "Deux noms de code dans les commits internes : **Capybara** et Tengu.",
+      "body": "Ces projets étaient en cours depuis plusieurs semaines. Économiser du compute sur un modèle en production pour financer la release suivante — c'est une décision de product, pas un bug."
+    },
+    {
+      "kind": "content",
+      "title": "Ce qui sort cette semaine : Opus 4.7 + un **outil de design IA**.",
+      "body": "Tu décris ce que tu veux. Il génère le site, la landing, la présentation. Pour les devs et les non-techs. Google Stitch va sentir la pression."
+    },
+    {
+      "kind": "content",
+      "title": "De l'autre côté : OpenAI sort **GPT-5.4 Cyber**.",
+      "body": "Un modèle spécialisé en cybersécurité défensive. La guerre des labs ne se joue plus sur les benchmarks généraux — elle se joue sur les verticales."
+    },
+    {
+      "kind": "cta",
+      "title": "La course à la **spécialisation** vient de commencer.",
+      "body": "Modèles généralistes d'un côté. Verticales ciblées de l'autre. La prochaine question pour chaque dev : quelle stack mérite un modèle dédié ?",
+      "footer": "Follow @julesd.dev"
+    }
+  ],
+  "caption": "Le drop de perf sur Claude Opus 4.6 — celui qui a fait du bruit dans la communauté — c'était pas un accident.\n\nC'était une décision consciente d'Anthropic pour économiser du compute avant la release de cette semaine : Opus 4.7 et un outil de design IA qui génère sites et landings à partir d'une description.\n\nPendant ce temps, OpenAI sort GPT-5.4 Cyber, spécialisé en cybersécurité défensive.\n\nLa guerre des labs ne se joue plus sur le meilleur score MMLU. Elle se joue sur les verticales.\n\nUn modèle spécialisé pour ta stack — tu en verrais l'utilité, ou le généraliste bien prompté suffit ?",
+  "hashtags": ["claude", "anthropic", "openai", "ia", "llm", "devfrancophone", "tech", "aitools"]
+}
