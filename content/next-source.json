@@ -1,5 +1,7 @@
 {
-  "exportedAt": "2026-04-15T04:56:30.361Z",
-  "kind": "fallback",
-  "theme": "human-pro"
+  "exportedAt": "2026-04-16T04:40:57.920Z",
+  "kind": "idea",
+  "sourceId": "cmo05r0c8000004joemk47uj9",
+  "text": "Claude Opus 4.7 sort cette semaine.\r\n\r\nMais c'est pas le plus intéressant.\r\n\r\nAnthropic lance un outil de design IA en parallèle.\r\n\r\nTu décris ce que tu veux.\r\nIl te génère le site, la landing, la présentation.\r\n\r\nPour les devs ET les non-techs.\r\n\r\nGoogle Stitch va transpirer.\r\n\r\nCe qui est marrant :\r\n\r\nLa baisse de perf sur Opus 4.6 (le fameux \"67% thinking drop\") c'était pas un bug.\r\n\r\nC'était volontaire.\r\n\r\nIls économisaient du compute pour préparer cette release.\r\n\r\nDans les commits internes qui ont leaké, y a des noms de code : Capybara et Tengu.\r\n\r\nÇa fait un moment que c'est en préparation.\r\n\r\nPendant ce temps, OpenAI sort GPT-5.4 Cyber.\r\n\r\nUn modèle spécialisé en cybersécurité défensive.\r\n\r\nLa guerre des modèles s'accélère.",
+  "hardCta": false
 }
