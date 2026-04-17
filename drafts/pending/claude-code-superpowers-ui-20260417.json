@@ -1,0 +1,42 @@
+{
+  "id": "claude-code-superpowers-ui-20260417",
+  "createdAt": "2026-04-17T09:00:00Z",
+  "theme": "build-in-public",
+  "sourceId": "cmnvwilmb000004ky36uxun61",
+  "sourceKind": "idea",
+  "slides": [
+    {
+      "kind": "hook",
+      "title": "J'attendais un gain de temps avec Claude Code. Ce que j'ai eu, c'est une **méthode** différente.",
+      "body": "Tu ne décris plus ce que tu veux. Tu montres une référence et tu affirmes une intention. L'outil comble l'écart."
+    },
+    {
+      "kind": "content",
+      "title": "Instagram-auto avait une UI fonctionnelle. Pas de **cohérence** visuelle.",
+      "body": "Chaque composant avait sa propre logique de couleur et d'espacement. Rien de cassé, rien d'aligné. Le genre d'état qu'on ne corrige jamais faute de temps."
+    },
+    {
+      "kind": "content",
+      "title": "Avec Superpowers, j'ai passé mon portfolio comme **référence**.",
+      "body": "julesdupuis.fr comme point de départ. Palette, typographie, espacement — Claude a produit des composants cohérents avec l'écosystème HegoaTek. Une session, pas une semaine."
+    },
+    {
+      "kind": "content",
+      "title": "Ce qui change vraiment : le **feedback loop** devient quasi-immédiat.",
+      "body": "Avant : prompt, attente, ajustement, re-prompt. Maintenant : tu vois le résultat, tu affines l'intention, tu valides. Le temps cognitif libéré va vers les décisions, pas les détails."
+    },
+    {
+      "kind": "content",
+      "title": "Prochain chantier : une appli de suivi d'exercices pour une **kiné**.",
+      "body": "Problème réel : ses patients ne font pas les exercices à domicile. Manque de clarté, pas d'outil adapté. Je construis quelque chose de spécifique pour tester la demande."
+    },
+    {
+      "kind": "cta",
+      "title": "Si ça marche pour un cabinet, ça marche pour d'autres. **SaaS** à prix honnête.",
+      "body": "Feedback utilisateur direct, pas de feature bloat, itération rapide. C'est la même approche que j'applique aux projets clients.",
+      "footer": "C'est ce genre de problème que je résous pour mes clients. Bio pour en parler."
+    }
+  ],
+  "caption": "J'ai refait l'UI d'instagram-auto avec Claude Code et le plugin Superpowers.\n\nJ'attendais un gain de temps. Ce que j'ai eu, c'est une méthode différente : tu montres une référence, tu affirmes une intention, l'outil comble l'écart. Direction artistique alignée sur julesdupuis.fr, cohérence HegoaTek, en une session.\n\nPendant ce temps, je démarre autre chose : une appli de suivi d'exercices pour les patients d'une amie kiné. Problème réel, feedback direct, ambition SaaS si le besoin se confirme.\n\nC'est ce genre de problème que je résous pour mes clients. Bio pour en parler.",
+  "hashtags": ["buildinpublic", "claudecode", "sideproject", "nextjs", "typescript", "freelance", "saas", "devfreelance", "indiedev", "healthtech"]
+}
