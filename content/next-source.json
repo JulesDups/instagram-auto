@@ -1,7 +1,7 @@
 {
-  "exportedAt": "2026-04-27T04:40:57.872Z",
+  "exportedAt": "2026-04-28T04:40:58.128Z",
   "kind": "idea",
-  "sourceId": "cmo3a6dpe000004jw33vs613e",
-  "text": "Les influenceurs et autres personnes random sur les réseaux font des posts ANGIOGENES sur les réseaux vis à vis de l'I.A. et l'instabilité autour des métiers qui touchent de près ou de loin à l'I.A. (surtout pour les devs) et cela est une honte...",
-  "hardCta": false
+  "sourceId": "cmohkuu8j000004l58y3f53fr",
+  "text": "J'ai repris le développement de mon projet pour la pelote basque et je suis entrain de mettre tous mes efforts pour obtenir un produit qui tient la route et qui soit commercialisable ! Je créé le fonctionnalité des tournois, la vue publique, la gestion administrateur, la création et toute la gestion d'un véritable tournoi de pelote directement dans une application là où aujourd'hui tout est fait à la main ou avec des fichiers excel et ça prend des heures... Ici : on importe les participants, on créé le poules, on ajuste et on paramètre les créneaux de jeu et le système propose un calendrier automatique selon des règles métiers.\r\nLe résultat : un tournoi géré, consultable avec des phases de poules, barrages et finales avec un arbre de tournois esthétique !",
+  "hardCta": true
 }
