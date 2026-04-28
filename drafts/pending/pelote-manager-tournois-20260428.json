@@ -1,0 +1,37 @@
+{
+  "id": "pelote-manager-tournois-20260428",
+  "createdAt": "2026-04-28T05:00:00.000Z",
+  "theme": "build-in-public",
+  "sourceId": "cmohkuu8j000004l58y3f53fr",
+  "sourceKind": "idea",
+  "slides": [
+    {
+      "kind": "hook",
+      "title": "En 2026, les tournois de pelote basque se gèrent encore aux **fichiers Excel**.",
+      "body": "Des heures de préparation pour quelque chose qu'un algorithme peut résoudre. J'ai construit l'outil qui manque."
+    },
+    {
+      "kind": "content",
+      "title": "L'organisateur importe les joueurs, configure les poules, **paramètre** les créneaux.",
+      "body": "Le système prend le relais : il propose un calendrier complet en respectant les contraintes. Pas de terrain en double, pas de joueur qui joue deux fois au même moment."
+    },
+    {
+      "kind": "content",
+      "title": "Le vrai défi, c'est d'**encoder** les règles métier.",
+      "body": "Un calendrier sans conflit de terrain. Des poules équilibrées. Des phases respectant la progression sportive. Ce n'est pas le code qui est dur — c'est la précision des règles à modéliser."
+    },
+    {
+      "kind": "content",
+      "title": "Résultat : poules, **barrages**, finales et arbre de tournoi dans l'app.",
+      "body": "Vue publique accessible sans connexion. Arbre généré automatiquement. Ce que des heures d'Excel produisaient, l'organisateur le génère en quelques clics."
+    },
+    {
+      "kind": "cta",
+      "title": "C'est ce genre de **domaine métier** que j'aime outiller.",
+      "body": "Pelote Manager n'a pas de concurrent direct. Et la plupart des secteurs de niche ont les mêmes besoins sans solution propre. Si tu as ce type de problème, c'est exactement là où je travaille.",
+      "footer": "C'est ce genre de problème que je résous pour mes clients. Bio pour en parler."
+    }
+  ],
+  "caption": "Pelote Manager, c'est un projet perso pour la pelote basque — un sport avec des tournois encore organisés à la main ou sur Excel.\n\nL'app permet d'importer les participants, former les poules, paramétrer les créneaux et générer un calendrier automatique. Elle produit les phases de poule, les barrages et les finales avec un arbre visuel consultable publiquement.\n\nCe que j'ai appris en construisant ça : les règles métier sont sous-estimées. La difficulté n'est pas dans le code générique — elle est dans l'encodage précis des contraintes du domaine.\n\nC'est ce genre de problème que je résous pour mes clients. Bio pour en parler.",
+  "hashtags": ["build-in-public", "side-project", "pelotebasque", "nextjs", "typescript", "freelance", "developpement", "sporttech", "webdev", "javascript"]
+}
