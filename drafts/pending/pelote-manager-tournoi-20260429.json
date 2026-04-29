@@ -1,0 +1,37 @@
+{
+  "id": "pelote-manager-tournoi-20260429",
+  "createdAt": "2026-04-29T04:45:00.000Z",
+  "theme": "build-in-public",
+  "sourceId": "cmohkuu8j000004l58y3f53fr",
+  "sourceKind": "idea",
+  "slides": [
+    {
+      "kind": "hook",
+      "title": "Un tournoi de pelote, c'est encore géré à la **main** en 2026.",
+      "body": "Feuilles Excel, SMS, WhatsApp. Les organisateurs passent des heures sur ce qu'un algorithme résout en secondes."
+    },
+    {
+      "kind": "content",
+      "title": "La vraie complexité, c'est les **règles métier**.",
+      "body": "Poules, barrages, finales. Les équipes ne peuvent pas se retrouver avant le stade final. Les créneaux ont des contraintes terrain. Un calendrier 'automatique' qui ignore ça ne marche pas."
+    },
+    {
+      "kind": "content",
+      "title": "Ce que le système fait **automatiquement**.",
+      "body": "Import des participants, génération des poules, paramétrage des créneaux. Le système propose un calendrier complet selon les règles métier. L'organisateur valide ou ajuste — il ne construit plus de zéro."
+    },
+    {
+      "kind": "content",
+      "title": "L'arbre de tournoi que **personne** n'avait.",
+      "body": "Vue publique consultable en temps réel. Poules → barrages → finales. Un arbre visuel qui se met à jour match par match. Ce qu'il y avait avant : un PDF envoyé par mail, quand il y avait de la chance."
+    },
+    {
+      "kind": "cta",
+      "title": "Un problème **métier** transformé en produit.",
+      "body": "Chaque fonctionnalité de Pelote Manager vient d'une vraie frustration d'organisateur. Pas d'une spec imaginée derrière un écran.",
+      "footer": "C'est ce genre de problème que je résous pour mes clients. Bio pour en parler."
+    }
+  ],
+  "caption": "Depuis des années, les organisateurs de tournois de pelote basque gèrent tout à la main. Excel, imprimer, corriger, re-envoyer.\n\nPour Pelote Manager, j'ai construit le module tournoi complet : import des participants, génération automatique des poules, gestion des créneaux avec les contraintes terrain, et un arbre de tournoi consultable en temps réel.\n\nCe n'est pas une démo. C'est un outil fait pour de vrais organisateurs, avec les vraies règles du sport.\n\nC'est ce genre de problème que je résous pour mes clients — comprendre le métier avant d'écrire une ligne.",
+  "hashtags": ["buildinpublic", "devfreelance", "sideproject", "nextjs", "typescript", "pelotebasque", "saas", "developpement", "hegoatek"]
+}
